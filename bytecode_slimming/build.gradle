@@ -1,0 +1,37 @@
+
+// 依赖groovy插件
+plugins {
+    id 'groovy'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation gradleApi()
+    implementation localGroovy()
+
+
+    implementation 'com.android.tools.build:gradle:3.5.3'
+//    implementation 'javassist:javassist:3.12.1.GA'
+    implementation 'org.ow2.asm:asm:6.0'
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
+
+apply plugin: 'maven' // 引入 maven 插件
+
+// 将该插件上传到本地Maven库
+group='com.hiro'
+
+version='1.0.0'
+
+// 通过gradlew :customPlugin:uploadArchives命令上传
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            //本地的Maven地址设置为../repos
+            repository(url: uri('../repos'))
+        }
+    }
+}
