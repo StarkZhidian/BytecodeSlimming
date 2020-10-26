@@ -1,0 +1,2 @@
+include ':bytecode_slimming', ':demo'
+rootProject.name = 'ApkSlimming'
