@@ -85,6 +85,7 @@ class ThirdClassVisitor extends ClassVisitor {
         if (!resultMethodVisitor[0]) {
             return new MethodInstructionChangeVisitor(Opcodes.ASM6, super.visitMethod(accesses[0], name, desc, signature, exceptions))
         }
+        // 该方法为需要删除的 access$xxx 方法，计数，同时返回 null
         AccessMethodInlineProcessor.getInstance().increaseOptimizeCount()
         return null;
     }

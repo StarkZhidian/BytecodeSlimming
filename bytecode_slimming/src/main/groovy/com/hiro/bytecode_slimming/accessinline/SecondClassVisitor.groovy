@@ -6,7 +6,10 @@ import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 
 /**
- * 第二次 class 文件扫描器
+ * 第二次 class 文件扫描器，记录第一步中 access$xxx 方法访问的字段/方法，
+ * 需要在下一次扫描中改为包默认的访问权限
+ *
+ * @author hongweiqiu
  */
 class SecondClassVisitor extends ClassVisitor {
 

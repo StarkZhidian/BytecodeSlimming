@@ -60,6 +60,7 @@ class ApkSlimmingTransform extends Transform {
         def jarFileList = getJarFileList(inputs)
         def classFileList = getClassFileList(inputs)
         processorList.each { processor ->
+            processor.optimizeStart()
             processor.transform(context, inputs, referencedInputs, outputProvider, isIncremental)
             processor.acceptJarFiles(jarFileList)
             processor.acceptClassFiles(classFileList)

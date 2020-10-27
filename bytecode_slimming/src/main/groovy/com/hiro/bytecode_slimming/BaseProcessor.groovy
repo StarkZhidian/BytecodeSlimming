@@ -14,6 +14,17 @@ abstract class BaseProcessor {
     /* 优化的 item 项数目（具体代表什么项取决于具体的 Processor） */
     protected def optimizeCount = 0
 
+    /**
+     * 处理器开始时回调的方法，将 optimizeCount 清 0
+     */
+    final void optimizeStart() {
+        optimizeCount = 0;
+        onOptimizeStart()
+    }
+
+    void onOptimizeStart() {
+    }
+
     void transform(Context context, Collection<TransformInput> inputs,
                    Collection<TransformInput> referencedInputs,
                    TransformOutputProvider outputProvider,
@@ -56,8 +67,13 @@ abstract class BaseProcessor {
     /**
      * 在 jar 和 class 文件都处理完了之后会回调的方法
      */
-    void optimizeEnd() {
+    final void optimizeEnd() {
         println "$TAG, 处理器：[$this] 运行结束，共优化了: $optimizeCount 项"
+        onOptimizeEnd()
+    }
+
+    void onOptimizeEnd() {
+        // do nothing
     }
 
     /**
