@@ -49,6 +49,6 @@ class AccessMethodInfoVisitor extends MethodVisitor {
     void visitEnd() {
         println "visitEnd"
         super.visitEnd()
-        AccessMethodInlineProcessor.getInstance().appendAccessMethod(className, methodName, accessMethodInfo)
+        AccessMethodInlineProcessor.getInstance().appendInlineMethod(className, methodName, accessMethodInfo)
     }
 }

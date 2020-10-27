@@ -1,5 +1,6 @@
 package com.hiro.bytecode_slimming.accessinline
 
+import com.hiro.bytecode_slimming.BaseClassVisitor
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor
@@ -9,25 +10,16 @@ import org.objectweb.asm.Opcodes;
  * 第一次扫描 class 文件的访问器，主要是记录每一个类中的 access$xxx 方法信息
  * @author hongweqiiu
  */
-class FirstClassVisitor extends ClassVisitor {
+class AccessMethodInlineFirstClassVisitor extends BaseClassVisitor {
 
-    static final def TAG = "FirstClassVisitor"
+    static final def TAG = "GetterSetterInlineFirstClassVisitor"
 
-    def className
-
-    FirstClassVisitor(int api) {
+    AccessMethodInlineFirstClassVisitor(int api) {
         super(api);
     }
 
-    FirstClassVisitor(int api, ClassVisitor cv) {
+    AccessMethodInlineFirstClassVisitor(int api, ClassVisitor cv) {
         super(api, cv);
-    }
-
-    @Override
-    void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        println "$TAG, version: $version, access: $access, name: $name, signature: $signature, superName: $superName, interfaces: $interfaces"
-        className = name;
-        super.visit(version, access, name, signature, superName, interfaces)
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.hiro.bytecode_slimming.accessinline
 
+import com.hiro.bytecode_slimming.BaseClassVisitor
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -11,31 +12,23 @@ import org.objectweb.asm.MethodVisitor
  *
  * @author hongweiqiu
  */
-class SecondClassVisitor extends ClassVisitor {
+class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
 
-    static final def String TAG = "SecondClassVisitor"
+    static final def String TAG = "AccessMethodInlineSecondClassVisitor"
 
-    def className
-
-    SecondClassVisitor(int api) {
+    AccessMethodInlineSecondClassVisitor(int api) {
         super(api)
     }
 
-    SecondClassVisitor(int api, ClassVisitor cv) {
+    AccessMethodInlineSecondClassVisitor(int api, ClassVisitor cv) {
         super(api, cv)
-    }
-
-    @Override
-    void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        className = name
-        super.visit(version, access, name, signature, superName, interfaces)
     }
 
     @Override
     FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         println "$TAG, visitField, access: $access, name: $name, desc: $desc, signature: $signature, value: $value"
         def accessMethodProcessor = AccessMethodInlineProcessor.getInstance()
-        accessMethodProcessor.accessMethodInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
+        accessMethodProcessor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
             // 字段匹配，则标记该字段需要将访问权限修改为默认访问权限，同时标记该 access$xxx 方法为可删除方法
             if (isSameField(accessMethodInfo.readFieldInfo, className, name, desc)) {
                 accessMethodInfo.readFieldInfo.needChange2PackageAccess = true
@@ -49,7 +42,7 @@ class SecondClassVisitor extends ClassVisitor {
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         println "$TAG, visitMethod, access: $access, name: $name, desc: $desc, signature: $signature, exceptions: $exceptions"
         def accessMethodProcessor = AccessMethodInlineProcessor.getInstance()
-        accessMethodProcessor.accessMethodInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
+        accessMethodProcessor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
             // 方法匹配，则标记该方法需要将访问权限修改为默认访问权限，同时标记该 access$xxx 方法为可删除方法
             if (isSameMethod(accessMethodInfo.invokeMethodInfo, className, name, desc)) {
                 accessMethodInfo.invokeMethodInfo.needChange2PackageAccess = true

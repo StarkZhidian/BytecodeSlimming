@@ -1,7 +1,7 @@
 package com.hiro.bytecode_slimming.accessinline
 
+import com.hiro.bytecode_slimming.BaseMethodInlineProcessor
 import com.hiro.bytecode_slimming.Utils
-import com.hiro.bytecode_slimming.BaseProcessor
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
@@ -10,8 +10,7 @@ import org.objectweb.asm.Opcodes
  * access$xxx 方法内联处理器
  * @author hongweiqiu
  */
-class AccessMethodInlineProcessor extends BaseProcessor {
-    Map<String, AccessMethodInfo> accessMethodInfoMap = new HashMap<>()
+class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
 
     static def getInstance() {
         return InstanceHolder.INSTANCE
@@ -20,22 +19,11 @@ class AccessMethodInlineProcessor extends BaseProcessor {
     private AccessMethodInlineProcessor() {
     }
 
-    void appendAccessMethod(def className, def methodName, def accessMethodInfo) {
-        if (Utils.isEmpty(className) || Utils.isEmpty(methodName) || accessMethodInfo == null) {
-            return
-        }
-        accessMethodInfoMap.put(makeAccessMethodInfoKey(className, methodName), accessMethodInfo)
-    }
-
     def getAccessMethodInfo(def className, def methodName) {
         if (Utils.isEmpty(className) || Utils.isEmpty(methodName)) {
             return null
         }
-        return accessMethodInfoMap.get(makeAccessMethodInfoKey(className, methodName))
-    }
-
-    static def makeAccessMethodInfoKey(def className, def methodName) {
-        return className + "#" + methodName
+        return methodInlineInfoMap.get(makeInlineMethodInfoKey(className, methodName))
     }
 
     @Override
@@ -43,18 +31,18 @@ class AccessMethodInlineProcessor extends BaseProcessor {
         // first traversal
         classList.each { classFile ->
             ClassReader cr = new ClassReader(classFile.bytes)
-            cr.accept(new FirstClassVisitor(Opcodes.ASM6, null), ClassReader.EXPAND_FRAMES)
+            cr.accept(new AccessMethodInlineFirstClassVisitor(Opcodes.ASM6, null), ClassReader.EXPAND_FRAMES)
         }
         // second traversal
         classList.each { classFile ->
             ClassReader cr = new ClassReader(classFile.bytes)
-            cr.accept(new SecondClassVisitor(Opcodes.ASM6, null), ClassReader.EXPAND_FRAMES)
+            cr.accept(new AccessMethodInlineSecondClassVisitor(Opcodes.ASM6, null), ClassReader.EXPAND_FRAMES)
         }
         // third traversal
         classList.each { classFile ->
             ClassReader cr = new ClassReader(classFile.bytes)
             ClassWriter classWriter = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
-            cr.accept(new ThirdClassVisitor(Opcodes.ASM6, classWriter), ClassReader.EXPAND_FRAMES)
+            cr.accept(new AccessMethodInlineThirdClassVisitor(Opcodes.ASM6, classWriter), ClassReader.EXPAND_FRAMES)
             // write final bytes data to origin file
             Utils.write2File(classWriter.toByteArray(), new File(classFile.parentFile, classFile.name))
         }

@@ -1,5 +1,7 @@
 package com.hiro.bytecode_slimming.accessinline
 
+import com.hiro.bytecode_slimming.BaseProcessor
+import com.hiro.bytecode_slimming.ProcessorManager
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -10,14 +12,13 @@ import org.objectweb.asm.Opcodes
  */
 class MethodInstructionChangeVisitor extends MethodVisitor {
 
-    static final def String TAG = 'MethodInstructionChangeVisitor'
+    static final def TAG = 'MethodInstructionChangeVisitor'
 
-    MethodInstructionChangeVisitor(int api) {
-        super(api)
-    }
+    private def processorKey
 
-    MethodInstructionChangeVisitor(int api, MethodVisitor mv) {
+    MethodInstructionChangeVisitor(int api, MethodVisitor mv, String processorKey) {
         super(api, mv)
+        this.processorKey = processorKey
     }
 
     @Override
@@ -26,8 +27,8 @@ class MethodInstructionChangeVisitor extends MethodVisitor {
         boolean[] visitResult = new boolean[1]
         visitResult[0] = false;
         if (opcode == Opcodes.INVOKESTATIC) {
-            def accessMethodProcessor = AccessMethodInlineProcessor.getInstance()
-            accessMethodProcessor.accessMethodInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
+            def processor = ProcessorManager.getInstance().getProcessor(processorKey)
+            processor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
                 // 如果调用的是 access$xxx 方法，则需要替换为 getfield/invokevirtual 指令
                 if (accessMethodInfo.canDelete
                         && Utils.textEquals(owner, accessMethodInfo.className)

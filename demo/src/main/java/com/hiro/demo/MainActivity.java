@@ -2,6 +2,7 @@ package com.hiro.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import com.hiro.demo.getter_setter.UseData;
 
 public class MainActivity extends Activity {
 
@@ -9,6 +10,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_main);
-        new MyClass(this).onCreate();
+        new AccessInlineClass(this).onCreate();
+        new UseData().onCreate();
     }
 }
