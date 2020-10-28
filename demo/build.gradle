@@ -53,7 +53,7 @@ android {
 
 }
 
-apply plugin: 'com.hiro.bytecode_slimming'
+apply plugin: 'com.hiro.android.bytecode_slimming'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
