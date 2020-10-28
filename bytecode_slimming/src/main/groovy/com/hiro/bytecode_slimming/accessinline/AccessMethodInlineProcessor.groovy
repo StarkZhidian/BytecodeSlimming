@@ -36,13 +36,8 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
         // second traversal
         classList.each { classFile ->
             ClassReader cr = new ClassReader(classFile.bytes)
-            cr.accept(new AccessMethodInlineSecondClassVisitor(Opcodes.ASM6, null), ClassReader.EXPAND_FRAMES)
-        }
-        // third traversal
-        classList.each { classFile ->
-            ClassReader cr = new ClassReader(classFile.bytes)
             ClassWriter classWriter = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
-            cr.accept(new AccessMethodInlineThirdClassVisitor(Opcodes.ASM6, classWriter), ClassReader.EXPAND_FRAMES)
+            cr.accept(new AccessMethodInlineSecondClassVisitor(Opcodes.ASM6, classWriter), ClassReader.EXPAND_FRAMES)
             // write final bytes data to origin file
             Utils.write2File(classWriter.toByteArray(), new File(classFile.parentFile, classFile.name))
         }

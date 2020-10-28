@@ -30,8 +30,7 @@ class MethodInstructionChangeVisitor extends MethodVisitor {
             def processor = ProcessorManager.getInstance().getProcessor(processorKey)
             processor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
                 // 如果调用的是 access$xxx 方法，则需要替换为 getfield/invokevirtual 指令
-                if (accessMethodInfo.canDelete
-                        && Utils.textEquals(owner, accessMethodInfo.className)
+                if (Utils.textEquals(owner, accessMethodInfo.className)
                         && Utils.textEquals(name, accessMethodInfo.methodName)
                         && Utils.textEquals(desc, accessMethodInfo.desc)) {
                     // 优先处理 access$xxx 中获取的字段，变成直接调用

@@ -14,8 +14,6 @@ class AccessMethodInfo {
     def readFieldInfo
     /* access$xxx 方法内部通过 invokespecial 指令调用方法信息 */
     def invokeMethodInfo
-    /* 记录当前对象描述的 access$xxx 方法是否可以删除 */
-    def canDelete
 
     AccessMethodInfo(def className, def methodName, def desc) {
         this.className = className
@@ -33,8 +31,7 @@ class AccessMethodInfo {
 
     @Override
     String toString() {
-        return "{className: $className, methodName: $methodName, desc: $desc, canDelete: $canDelete, readlFieldInfo: " + readFieldInfo + ", invokeMethodInfo: " + invokeMethodInfo + "}"
-
+        return "{className: $className, methodName: $methodName, desc: $desc, readlFieldInfo: " + readFieldInfo + ", invokeMethodInfo: " + invokeMethodInfo + "}"
     }
 
     /**
@@ -45,7 +42,6 @@ class AccessMethodInfo {
         def fieldClassName
         def fieldName
         def desc
-        def needChange2PackageAccess
 
         ReadFieldInfo(def opcode, def fieldClassName, def fieldName, def desc) {
             this.opcode = opcode
@@ -56,7 +52,7 @@ class AccessMethodInfo {
 
         @Override
         String toString() {
-            return "{opcode: $opcode, fieldClassName: $fieldClassName, fieldName: $fieldName, desc: $desc, needChange2PackageAccess: $needChange2PackageAccess}"
+            return "{opcode: $opcode, fieldClassName: $fieldClassName, fieldName: $fieldName, desc: $desc}"
         }
     }
 

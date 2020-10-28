@@ -24,5 +24,11 @@ class BaseMethodInlineProcessor extends BaseProcessor {
         return className + "#" + methodName
     }
 
-
+    @Override
+    void onOptimizeEnd() {
+        super.onOptimizeEnd()
+        // 优化结束，清除数据，触发内存回收
+        methodInlineInfoMap.clear()
+        System.gc()
+    }
 }
