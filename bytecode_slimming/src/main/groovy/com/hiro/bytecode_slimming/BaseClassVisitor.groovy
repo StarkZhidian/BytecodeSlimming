@@ -10,6 +10,8 @@ class BaseClassVisitor extends ClassVisitor {
 
     /* 记录当前访问的类名 */
     def className
+    /* 记录当前访问类的父类名 */
+    def superClassName
 
     BaseClassVisitor(int api) {
         super(api)
@@ -22,6 +24,7 @@ class BaseClassVisitor extends ClassVisitor {
     @Override
     void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         className = name
+        superClassName = superName
         super.visit(version, access, name, signature, superName, interfaces)
     }
 }

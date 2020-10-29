@@ -23,7 +23,7 @@ class AccessMethodInvokeVisitor extends BaseMethodVisitor {
     void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
         // 如果方法内部调用了 access$xxx 方法，那么将这个文件也记录到 access$xxx 方法关联的类文件列表中
         if (opcode == Opcodes.INVOKESTATIC && name.startsWith('access$')) {
-            AccessMethodInlineProcessor.getInstance().appendOptimizeClassFile(classFile)
+            AccessMethodInlineProcessor.getInstance().appendOptimizeClassFile(className)
         }
         super.visitMethodInsn(opcode, owner, name, desc, itf)
     }

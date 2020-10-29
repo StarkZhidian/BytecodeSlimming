@@ -2,6 +2,7 @@ package com.hiro.bytecode_slimming.accessinline
 
 import com.hiro.bytecode_slimming.BaseClassVisitor
 import com.hiro.bytecode_slimming.ProcessorManager
+import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor
@@ -27,6 +28,15 @@ class AccessMethodInlineFirstClassVisitor extends BaseClassVisitor {
     }
 
     @Override
+    void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        super.visit(version, access, name, signature, superName, interfaces)
+        AccessMethodInlineProcessor.getInstance().className2ClassFilePathMap.put(name, classFile.absolutePath)
+        if (!Utils.textEquals(superName, "java/lang/Object")) {
+            AccessMethodInlineProcessor.getInstance().className2SuperClassNameMap.put(name, superName)
+        }
+    }
+
+    @Override
     FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         return super.visitField(access, name, desc, signature, value)
 
@@ -41,7 +51,7 @@ class AccessMethodInlineFirstClassVisitor extends BaseClassVisitor {
             // 同时记录类文件对象
             AccessMethodInlineProcessor processor =
                     ProcessorManager.getInstance().getProcessor(ProcessorManager.KEY_ACCESS_METHOD_INLINE)
-            processor.appendOptimizeClassFile(classFile)
+            processor.appendOptimizeClassFile(className)
             return new AccessMethodInfoVisitor(Opcodes.ASM6, null, className, access, name, desc, signature, exceptions)
         }
         return new AccessMethodInvokeVisitor(Opcodes.ASM6, null, className, access, name, desc, signature, exceptions, classFile)

@@ -14,7 +14,9 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
 
     private static final def TAG = "AccessMethodInlineProcessor"
 
-    private Map<String, Boolean> needOptimizeClassFileMap = new HashMap<>()
+    private Map<String, Boolean> needOptimizeClassNameRecorder = new HashMap<>()
+    Map<String, String> className2ClassFilePathMap = new HashMap<>()
+    Map<String, String> className2SuperClassNameMap = new HashMap<>()
 
     static def getInstance() {
         return InstanceHolder.INSTANCE
@@ -23,13 +25,12 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
     private AccessMethodInlineProcessor() {
     }
 
-    void appendOptimizeClassFile(File classFile) {
-        def classFilePath
-        if (classFile == null
-                || needOptimizeClassFileMap.containsKey(classFilePath = classFile.getAbsolutePath())) {
+    void appendOptimizeClassFile(String className) {
+        if (className == null
+                || needOptimizeClassNameRecorder.containsKey(className)) {
             return
         }
-        needOptimizeClassFileMap.put(classFilePath, true)
+        needOptimizeClassNameRecorder.put(className, true)
     }
 
     def getAccessMethodInfo(def className, def methodName) {
@@ -48,15 +49,27 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
                     Opcodes.ASM6, null, classFile), ClassReader.EXPAND_FRAMES)
         }
         println "$TAG, methodInlineInfoMap: $methodInlineInfoMap"
-        def traversalFileList = classList
-        if (!needOptimizeClassFileMap.isEmpty()) {
-            println "$TAG, needOptimizeClassFileSize = [" + needOptimizeClassFileMap.size() + "], needOptimizeClassFileMap: " + needOptimizeClassFileMap
-            traversalFileList = needOptimizeClassFileMap.keySet()
+        def traversalFilePathList = classList
+        if (!needOptimizeClassNameRecorder.isEmpty()) {
+            traversalFilePathList = new ArrayList<>()
+            def classFilePath
+            needOptimizeClassNameRecorder.keySet().each { String className ->
+                // 循环添加当前类文件和父类文件
+                // 因为存在内部类访问外部类的父类中的 protected 字段/方法的情况，
+                // 所以第二步处理文件列表中需要带上 access$xxx 方法所在类的所有父类
+                while ((!Utils.isEmpty(className))
+                        && (!Utils.isEmpty(classFilePath = className2ClassFilePathMap.get(className)))
+                        && (!traversalFilePathList.contains(classFilePath))) {
+                    traversalFilePathList.add(classFilePath)
+                    className = className2SuperClassNameMap.get(className)
+                }
+            }
         }
+        println "$TAG, needOptimizeClassFileSize = [" + traversalFilePathList.size() + "], needOptimizeClassNameRecorder: " + traversalFilePathList
         // second traversal
-        traversalFileList.each { classFile ->
+        traversalFilePathList.each { classFile ->
             if (classFile instanceof String) {
-                classFile = new File((String) classFile)
+                classFile = new File(classFile)
             }
             ClassReader cr = new ClassReader(classFile.bytes)
             ClassWriter classWriter = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
@@ -69,7 +82,7 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
     @Override
     void onOptimizeEnd() {
         super.onOptimizeEnd()
-        needOptimizeClassFileMap.clear()
+        needOptimizeClassNameRecorder.clear()
         System.gc()
     }
 

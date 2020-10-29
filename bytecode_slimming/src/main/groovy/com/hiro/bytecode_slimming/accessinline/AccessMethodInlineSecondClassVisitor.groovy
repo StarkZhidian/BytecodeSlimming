@@ -32,8 +32,7 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
         accessMethodProcessor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
             // 每个字段只操作一次，需要通过 resultMethodVisitor[0] 的值来过滤
             if (!resultVisitor[0]
-                    && isOperateFieldMember(accessMethodInfo.operateFieldInfoList, className, name, desc)
-                    && AccessMethodInlineFirstClassVisitor.accessMethodCanDelete(accessMethodInfo)) {
+                    && isOperateFieldMember(accessMethodInfo.operateFieldInfoList, className, name, desc)) {
                 println "$TAG, changeFieldAccess2Public: " + accessMethodInfo.operateFieldInfoList
                 // 匹配成功，将字段改成 public 的
                 super.visitField(Utils.toPublic(access), name, desc, signature, value)
@@ -92,7 +91,7 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
             if (result[0]) {
                 return true
             }
-            if ((Utils.textEquals(fileInfo.fieldClassName, className))
+            if ((judgeIsSameOrSuperClass(fileInfo.fieldClassName, className))
                     && (Utils.textEquals(fileInfo.fieldName, fieldName))
                     && (Utils.textEquals(fileInfo.desc, desc))) {
                 result[0] = true
@@ -110,7 +109,7 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
             if (result[0]) {
                 return true
             }
-            if ((Utils.textEquals(methodInfo.methodClassName, className))
+            if ((judgeIsSameOrSuperClass(methodInfo.methodClassName, className))
                     && (Utils.textEquals(methodInfo.methodName, methodName))
                     && (Utils.textEquals(methodInfo.desc, desc))) {
                 result[0] = true
@@ -118,5 +117,21 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
             }
         }
         return result[0]
+    }
+
+    /**
+     * 判断参数 1 是否和参数 2 是同一个类/是参数 2 的子类
+     */
+    static def judgeIsSameOrSuperClass(String judgeSubClassName, String judgeSuperClassName) {
+        def superClassName = judgeSubClassName
+        while (!Utils.isEmpty(superClassName)) {
+            if (Utils.textEquals(superClassName, judgeSuperClassName)) {
+                return true
+            }
+            // 循环判断是否为父子类关系
+            superClassName = AccessMethodInlineProcessor.getInstance()
+                    .className2SuperClassNameMap.get(superClassName)
+        }
+        return false
     }
 }
