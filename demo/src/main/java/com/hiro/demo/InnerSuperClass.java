@@ -3,7 +3,7 @@ package com.hiro.demo;
 public class InnerSuperClass {
     protected int x;
 
-    int getSuperX() {
+    protected int getSuperX() {
         return x;
     }
 }

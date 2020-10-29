@@ -14,7 +14,7 @@ import org.objectweb.asm.Opcodes
  */
 class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
 
-    def TAG = 'AccessMethodInlineSecondClassVisitor'
+    private static def TAG = 'AccessMethodInlineSecondClassVisitor'
 
     AccessMethodInlineSecondClassVisitor(int api) {
         super(api)
@@ -26,17 +26,17 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
 
     @Override
     FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        println "$TAG, visitField, access: $access, name: $name, desc: $desc, signature: $signature, value: $value"
         def resultVisitor = [false]
         def accessMethodProcessor = AccessMethodInlineProcessor.getInstance()
         // 遍历已经记录需要删除 ACC_PRIVATE 标志的所有字段
         accessMethodProcessor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
             // 每个字段只操作一次，需要通过 resultMethodVisitor[0] 的值来过滤
             if (!resultVisitor[0]
-                    && isSameField(accessMethodInfo.readFieldInfo, className, name, desc)) {
-                println "$TAG, changeFieldAccess2Package: " + accessMethodInfo.readFieldInfo
-                // 匹配成功，删除字段 flag 中的 ACC_PRIVATE 标识
-                super.visitField(access - Opcodes.ACC_PRIVATE, name, desc, signature, value)
+                    && isOperateFieldMember(accessMethodInfo.operateFieldInfoList, className, name, desc)
+                    && AccessMethodInlineFirstClassVisitor.accessMethodCanDelete(accessMethodInfo)) {
+                println "$TAG, changeFieldAccess2Public: " + accessMethodInfo.operateFieldInfoList
+                // 匹配成功，将字段改成 public 的
+                super.visitField(Utils.toPublic(access), name, desc, signature, value)
                 resultVisitor[0] = true
             }
         }
@@ -50,13 +50,14 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
 
     @Override
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        println "$TAG, visitMethod, access: $access, name: $name, desc: $desc, signature: $signature, exceptions: $exceptions"
-        def resultMethodVisitor = [false];
+        def resultMethodVisitor = [false]
         def accesses = [access]
         def accessMethodProcessor = AccessMethodInlineProcessor.getInstance()
         // 遍历已经记录的所有方法
         accessMethodProcessor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
-            println "$TAG, accessMethodInfo: $accessMethodInfo, className equals: " + Utils.textEquals(accessMethodInfo.className, className) + ", methodName equals: " + Utils.textEquals(accessMethodInfo.methodName, name) + ", desc equals: " + Utils.textEquals(accessMethodInfo.desc, desc)
+            if (!AccessMethodInlineFirstClassVisitor.accessMethodCanDelete(accessMethodInfo)) {
+                return
+            }
             // 匹配到要删除的 access$xxx 方法，方法只删除一次，通过 resultMethodVisitor[0] 的值来过滤
             if (!resultMethodVisitor[0]
                     && ((accesses[0] & Opcodes.ACC_SYNTHETIC) == Opcodes.ACC_SYNTHETIC)
@@ -65,12 +66,10 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
                     && (Utils.textEquals(accessMethodInfo.desc, desc))) {
                 println "$TAG, need2DeleteMethod: " + accessMethodInfo
                 resultMethodVisitor[0] = true
-            } else if (isSameMethod(accessMethodInfo.invokeMethodInfo, className, name, desc)
-                    && (accesses[0] & Opcodes.ACC_PRIVATE) == Opcodes.ACC_PRIVATE) {
-                // 匹配到 access$xxx 方法调用的 private 方法，
-                // 删除方法 flag 中的 ACC_PRIVATE 标识，方法访问权限上升到默认访问权限
-                accesses[0] -= Opcodes.ACC_PRIVATE
-                println "$TAG, changeMethodAccess2Package: " + accessMethodInfo.invokeMethodInfo
+            } else if (isInvokeMethodMember(accessMethodInfo.invokeMethodInfoList, className, name, desc)) {
+                // 匹配到 access$xxx 方法调用的 private 方法，改成 public 访问权限
+                accesses[0] = Utils.toPublic(accesses[0])
+                println "$TAG, changeMethodAccess2Public: " + accessMethodInfo.invokeMethodInfoList
             }
         }
         // 如果 resultMethodVisitor[0] 为 false，证明没有匹配到要删除的方法，返回自定义的方法访问器
@@ -84,23 +83,40 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
         return null;
     }
 
-    @Override
-    void visitEnd() {
-        println "$TAG, visitEnd"
-        super.visitEnd()
-    }
-
-    static def isSameField(def fieldInfo, def className, def fieldName, def desc) {
-        if (fieldInfo == null) {
+    static def isOperateFieldMember(List fieldInfoList, String className, String fieldName, String desc) {
+        if (fieldInfoList == null || fieldInfoList.isEmpty()) {
             return false;
         }
-        return Utils.textEquals(fieldInfo.fieldClassName, className) && Utils.textEquals(fieldInfo.fieldName, fieldName) && Utils.textEquals(fieldInfo.desc, desc)
+        def result = [false]
+        fieldInfoList.each { AccessMethodInfo.OperateFieldInfo fileInfo ->
+            if (result[0]) {
+                return true
+            }
+            if ((Utils.textEquals(fileInfo.fieldClassName, className))
+                    && (Utils.textEquals(fileInfo.fieldName, fieldName))
+                    && (Utils.textEquals(fileInfo.desc, desc))) {
+                result[0] = true
+            }
+        }
+        return result[0]
     }
 
-    static def isSameMethod(def methodInfo, def className, def methodName, def desc) {
-        if (methodInfo == null) {
+    static def isInvokeMethodMember(List methodInfoList, String className, String methodName, String desc) {
+        if (methodInfoList == null || methodInfoList.isEmpty()) {
             return false
         }
-        return Utils.textEquals(methodInfo.methodClassName, className) && Utils.textEquals(methodInfo.methodName, methodName) && Utils.textEquals(methodInfo.desc, desc)
+        def result = [false]
+        methodInfoList.each { AccessMethodInfo.InvokeMethodInfo methodInfo ->
+            if (result[0]) {
+                return true
+            }
+            if ((Utils.textEquals(methodInfo.methodClassName, className))
+                    && (Utils.textEquals(methodInfo.methodName, methodName))
+                    && (Utils.textEquals(methodInfo.desc, desc))) {
+                result[0] = true
+                return
+            }
+        }
+        return result[0]
     }
 }

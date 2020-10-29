@@ -11,9 +11,11 @@ class AccessMethodInfo {
     /* 方法的描述（java 层的方法签名除去方法名） */
     def desc
     /* access$xxx 方法内部访问(通过 getfield 指令)的字段 */
-    def readFieldInfo
+    def operateFieldInfoList = new ArrayList()
     /* access$xxx 方法内部通过 invokespecial 指令调用方法信息 */
-    def invokeMethodInfo
+    def invokeMethodInfoList = new ArrayList()
+    /* 当前 access$xxx 方法内部相关指令列表 */
+    def instructions
 
     AccessMethodInfo(def className, def methodName, def desc) {
         this.className = className
@@ -21,29 +23,35 @@ class AccessMethodInfo {
         this.desc = desc
     }
 
-    void setReadFieldInfo(readFieldInfo) {
-        this.readFieldInfo = readFieldInfo
+    void appendOperateFiledInfo(OperateFieldInfo operateFieldInfo) {
+        if (operateFieldInfo == null) {
+            return
+        }
+        operateFieldInfoList.add(operateFieldInfo)
     }
 
-    void setInvokeMethodInfo(invokeMethodInfo) {
-        this.invokeMethodInfo = invokeMethodInfo
+    void appendInvokeMethodInfo(InvokeMethodInfo invokeMethodInfo) {
+        if (invokeMethodInfo == null) {
+            return
+        }
+        invokeMethodInfoList.add(invokeMethodInfo)
     }
 
     @Override
     String toString() {
-        return "{className: $className, methodName: $methodName, desc: $desc, readlFieldInfo: " + readFieldInfo + ", invokeMethodInfo: " + invokeMethodInfo + "}"
+        return "{className: $className, methodName: $methodName, desc: $desc, operateFieldInfoList: " + operateFieldInfoList + ", invokeMethodInfoList: " + invokeMethodInfoList + "}"
     }
 
     /**
      * 记录 access$xxx 方法内部访问的字段信息
      */
-    static class ReadFieldInfo {
+    static class OperateFieldInfo {
         def opcode
         def fieldClassName
         def fieldName
         def desc
 
-        ReadFieldInfo(def opcode, def fieldClassName, def fieldName, def desc) {
+        OperateFieldInfo(def opcode, def fieldClassName, def fieldName, def desc) {
             this.opcode = opcode
             this.fieldClassName = fieldClassName
             this.fieldName = fieldName
@@ -64,7 +72,6 @@ class AccessMethodInfo {
         def methodClassName
         def methodName
         def desc
-        def needChange2PackageAccess
 
         InvokeMethodInfo(def opcode, def methodClassName, def methodName, def desc) {
             this.opcode = opcode
@@ -75,7 +82,7 @@ class AccessMethodInfo {
 
         @Override
         String toString() {
-            return "{opcode: $opcode, methodClassName: $methodClassName, methodName: $methodName, desc: $desc, needChange2PackageAccess: $needChange2PackageAccess}"
+            return "{opcode: $opcode, methodClassName: $methodClassName, methodName: $methodName, desc: $desc}"
         }
     }
 

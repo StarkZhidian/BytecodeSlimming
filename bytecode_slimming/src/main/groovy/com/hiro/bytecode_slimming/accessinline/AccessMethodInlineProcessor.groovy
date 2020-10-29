@@ -12,11 +12,24 @@ import org.objectweb.asm.Opcodes
  */
 class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
 
+    private static final def TAG = "AccessMethodInlineProcessor"
+
+    private Map<String, Boolean> needOptimizeClassFileMap = new HashMap<>()
+
     static def getInstance() {
         return InstanceHolder.INSTANCE
     }
 
     private AccessMethodInlineProcessor() {
+    }
+
+    void appendOptimizeClassFile(File classFile) {
+        def classFilePath
+        if (classFile == null
+                || needOptimizeClassFileMap.containsKey(classFilePath = classFile.getAbsolutePath())) {
+            return
+        }
+        needOptimizeClassFileMap.put(classFilePath, true)
     }
 
     def getAccessMethodInfo(def className, def methodName) {
@@ -31,16 +44,33 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
         // first traversal
         classList.each { classFile ->
             ClassReader cr = new ClassReader(classFile.bytes)
-            cr.accept(new AccessMethodInlineFirstClassVisitor(Opcodes.ASM6, null), ClassReader.EXPAND_FRAMES)
+            cr.accept(new AccessMethodInlineFirstClassVisitor(
+                    Opcodes.ASM6, null, classFile), ClassReader.EXPAND_FRAMES)
+        }
+        println "$TAG, methodInlineInfoMap: $methodInlineInfoMap"
+        def traversalFileList = classList
+        if (!needOptimizeClassFileMap.isEmpty()) {
+            println "$TAG, needOptimizeClassFileSize = [" + needOptimizeClassFileMap.size() + "], needOptimizeClassFileMap: " + needOptimizeClassFileMap
+            traversalFileList = needOptimizeClassFileMap.keySet()
         }
         // second traversal
-        classList.each { classFile ->
+        traversalFileList.each { classFile ->
+            if (classFile instanceof String) {
+                classFile = new File((String) classFile)
+            }
             ClassReader cr = new ClassReader(classFile.bytes)
             ClassWriter classWriter = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
             cr.accept(new AccessMethodInlineSecondClassVisitor(Opcodes.ASM6, classWriter), ClassReader.EXPAND_FRAMES)
             // write final bytes data to origin file
             Utils.write2File(classWriter.toByteArray(), new File(classFile.parentFile, classFile.name))
         }
+    }
+
+    @Override
+    void onOptimizeEnd() {
+        super.onOptimizeEnd()
+        needOptimizeClassFileMap.clear()
+        System.gc()
     }
 
     static class InstanceHolder {
