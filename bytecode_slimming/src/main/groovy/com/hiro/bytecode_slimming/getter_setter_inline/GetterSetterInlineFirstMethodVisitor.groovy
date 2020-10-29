@@ -39,7 +39,6 @@ class GetterSetterInlineFirstMethodVisitor extends BaseMethodVisitor {
 
     @Override
     void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        println "$TAG, visitFieldInsn: opcode: $opcode, owner: $owner, name: $name, desc: $desc"
         if (this.opcode != Opcodes.NOP) {
             this.opcode = INVALID_OPCODE
         } else if ((opcode == Opcodes.GETFIELD || opcode == Opcodes.PUTFIELD)) {

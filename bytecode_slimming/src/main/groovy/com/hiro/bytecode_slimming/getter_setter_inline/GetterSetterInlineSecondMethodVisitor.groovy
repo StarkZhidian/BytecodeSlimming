@@ -23,9 +23,7 @@ class GetterSetterInlineSecondMethodVisitor extends BaseMethodVisitor {
 
     @Override
     void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-        println "$TAG, visitMethodInsn, opcode: $opcode, owner: $owner, name: $name, desc: $desc, itf: $itf"
-        boolean[] visitResult = new boolean[1]
-        visitResult[0] = false;
+        def visitResult = [false]
         if (opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKESPECIAL) {
             def processor = ProcessorManager.getInstance().getProcessor(processKey)
             processor.methodInlineInfoMap.values().each { getterSetterMethodInfo ->
@@ -34,13 +32,13 @@ class GetterSetterInlineSecondMethodVisitor extends BaseMethodVisitor {
                         && Utils.textEquals(name, getterSetterMethodInfo.methodName)
                         && Utils.textEquals(desc, getterSetterMethodInfo.desc)) {
                     // 处理 getter/setter 中获取的字段，变成直接调用
-                    if (getterSetterMethodInfo.readFieldInfo != null) {
+                    if (getterSetterMethodInfo.operateFieldInfoList != null) {
                         // 标识为 true，意为该方法可以删除
                         visitResult[0] = true
-                        visitFieldInsn(getterSetterMethodInfo.readFieldInfo.opcode,
-                                getterSetterMethodInfo.readFieldInfo.fieldClassName,
-                                getterSetterMethodInfo.readFieldInfo.fieldName,
-                                getterSetterMethodInfo.readFieldInfo.desc)
+                        visitFieldInsn(getterSetterMethodInfo.operateFieldInfoList.opcode,
+                                getterSetterMethodInfo.operateFieldInfoList.fieldClassName,
+                                getterSetterMethodInfo.operateFieldInfoList.fieldName,
+                                getterSetterMethodInfo.operateFieldInfoList.desc)
                         return
                     }
                 }

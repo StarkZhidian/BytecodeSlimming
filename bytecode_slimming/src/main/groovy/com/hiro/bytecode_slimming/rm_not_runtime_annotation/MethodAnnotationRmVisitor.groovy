@@ -20,9 +20,9 @@ class MethodAnnotationRmVisitor extends MethodVisitor {
 
     @Override
     AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        println "$TAG, visitAnnotation, desc: $desc, visible: $visible"
         // 如果该注解运行时不可见（即为非 runtime 作用域的注解，则删除）
         if (!visible) {
+            println "$TAG, visitAnnotation, desc: $desc, visible: $visible"
             AnnotationRemoveProcessor.getInstance().increaseOptimizeCount()
             return null
         }

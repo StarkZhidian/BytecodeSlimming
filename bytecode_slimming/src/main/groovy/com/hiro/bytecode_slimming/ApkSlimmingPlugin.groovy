@@ -7,17 +7,22 @@ import com.hiro.bytecode_slimming.rm_not_runtime_annotation.AnnotationRemoveProc
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+/**
+ * bytecode_slimming 插件入口
+ * @author hongweiqiu
+ */
 class ApkSlimmingPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        println "BytecodeSlimming, version: 1.1.0"
         def androidExtension = project.extensions.getByType(AppExtension)
         def apkSlimmingTransform = new ApkSlimmingTransform(project)
         def processorManager = ProcessorManager.getInstance()
         // 添加 access$xxx 方法内联 processor
         apkSlimmingTransform.addProcessor(processorManager.getProcessor(ProcessorManager.KEY_ACCESS_METHOD_INLINE))
         // 添加 getter/setter 方法内联 processor
-        apkSlimmingTransform.addProcessor(processorManager.getProcessor(ProcessorManager.KEY_GETTER_SETTER_METHOD_INLINE))
+//        apkSlimmingTransform.addProcessor(processorManager.getProcessor(ProcessorManager.KEY_GETTER_SETTER_METHOD_INLINE))
         // 添加运行时不可见 annotation 注解去除 processor
         apkSlimmingTransform.addProcessor(processorManager.getProcessor(ProcessorManager.KEY_NOT_RUNTIME_ANNOTATION_REMOVE))
         // 注册 transform

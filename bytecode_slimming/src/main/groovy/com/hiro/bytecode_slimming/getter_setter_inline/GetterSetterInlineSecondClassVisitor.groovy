@@ -27,7 +27,6 @@ class GetterSetterInlineSecondClassVisitor extends BaseClassVisitor {
 
     @Override
     FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        println "$TAG, visitField, access: $access, name: $name, desc: $desc, signature: $signature, value: $value"
         def resultVisitor = [false]
         def getterSetterInlineProcessor = GetterSetterInlineProcessor.getInstance()
         // 遍历已经记录需要改为 ACC_PUBLIC 标志的字段，每个字段只改一次
@@ -50,12 +49,10 @@ class GetterSetterInlineSecondClassVisitor extends BaseClassVisitor {
 
     @Override
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        println "$TAG, visitMethod, access: $access, name: $name, desc: $desc, signature: $signature, exceptions: $exceptions"
         def resultMethodVisitor = [false];
         def getterSetterMethodInlineProcessor = GetterSetterInlineProcessor.getInstance()
         // 遍历已经记录的所有方法
         getterSetterMethodInlineProcessor.methodInlineInfoMap.values().each { getterSetterMethodInfo ->
-            println "$TAG, getterSetterMethodInfo: $getterSetterMethodInfo, className equals: " + Utils.textEquals(getterSetterMethodInfo.className, className) + ", methodName equals: " + Utils.textEquals(getterSetterMethodInfo.methodName, name) + ", desc equals: " + Utils.textEquals(getterSetterMethodInfo.desc, desc)
             // 匹配到要删除的 getter/setter 方法，设置 resultMethodVisitor[0] 为 true
             if (!resultMethodVisitor[0]
                     && (Utils.textEquals(getterSetterMethodInfo.className, className))
