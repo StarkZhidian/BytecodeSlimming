@@ -22,6 +22,12 @@ class ClassAnnotationRmVisitor extends ClassVisitor {
     }
 
     @Override
+    void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        // println "$TAG, version: $version, access: $access, name: $name, signature: $signature, superName: $superName, interfaces: $interfaces"
+        super.visit(version, access, name, signature, superName, interfaces)
+    }
+
+    @Override
     AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         // 如果该注解运行时不可见（即为非 runtime 作用域的注解，则删除）
         if (!visible) {

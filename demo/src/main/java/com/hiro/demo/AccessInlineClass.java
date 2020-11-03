@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import com.hiro.demo.getter_setter.DataModel;
 import com.hiro.demo.superclass.InnerSuperClass;
+import com.hiro.demo.superclass.InnerSuperClassMethodInvoke;
 
 public class AccessInlineClass extends InnerSuperClass {
     private static final String TAG = "AccessInlineClass";
@@ -48,6 +49,7 @@ public class AccessInlineClass extends InnerSuperClass {
     private class NormalInnerClass {
         NormalInnerClass() {
             Log.d("NormalInnerClass", "outter class x: " + x + ", getSuperX: " + getSuperX());
+            new InnerSuperClassMethodInvoke();
         }
     }
 

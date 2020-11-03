@@ -2,8 +2,12 @@ package com.hiro.bytecode_slimming
 
 import org.objectweb.asm.Opcodes
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 class Utils {
 
+    private static Pattern paramsPat = Pattern.compile("(\\[?[BCZSIJFD])|(L[^;]+;)");
 
     static def isEmpty(CharSequence charSequence) {
         return charSequence == null || charSequence.length() == 0
@@ -56,5 +60,18 @@ class Utils {
             access = access & (!Opcodes.ACC_PUBLIC)
         }
         return access
+    }
+
+    static def getParameterCountFromMethodDesc(String desc) {
+        int beginIndex = desc.indexOf('(') + 1;
+        int endIndex = desc.lastIndexOf(')');
+        String paramsDesc = desc.substring(beginIndex, endIndex);
+        if (paramsDesc.isEmpty()) return 0;
+        int count = 0;
+        Matcher matcher = paramsPat.matcher(paramsDesc);
+        while (matcher.find()) {
+            count++;
+        }
+        return count;
     }
 }

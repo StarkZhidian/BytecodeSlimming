@@ -6,7 +6,6 @@ import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.*
-import com.hiro.bytecode_slimming.TypeUtil
 
 /**
  * 编译器自动生成的 access$xxx 方法的访问器
@@ -34,40 +33,40 @@ class AccessMethodInfoVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitInsn(final int opcode) {
+    void visitInsn(final int opcode) {
         super.visitInsn(opcode);
         instructions.add(new InsnNode(opcode));
     }
 
     @Override
-    public void visitIntInsn(final int opcode, final int operand) {
+    void visitIntInsn(final int opcode, final int operand) {
         super.visitIntInsn(opcode, operand);
         instructions.add(new IntInsnNode(opcode, operand));
     }
 
     @Override
-    public void visitVarInsn(final int opcode, final int var) {
+    void visitVarInsn(final int opcode, final int var) {
         super.visitVarInsn(opcode, var);
         instructions.add(new VarInsnNode(opcode, var));
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, final String type) {
+    void visitTypeInsn(final int opcode, final String type) {
         super.visitTypeInsn(opcode, type);
         instructions.add(new TypeInsnNode(opcode, type));
     }
 
     @Override
-    public void visitFieldInsn(final int opcode, final String owner,
-                               final String name, final String desc) {
+    void visitFieldInsn(final int opcode, final String owner,
+                        final String name, final String desc) {
         super.visitFieldInsn(opcode, owner, name, desc);
         instructions.add(new FieldInsnNode(opcode, owner, name, desc));
     }
 
     @Deprecated
     @Override
-    public void visitMethodInsn(int opcode, String owner, String name,
-                                String desc) {
+    void visitMethodInsn(int opcode, String owner, String name,
+                         String desc) {
         if (api >= Opcodes.ASM5) {
             super.visitMethodInsn(opcode, owner, name, desc);
             return;
@@ -77,8 +76,8 @@ class AccessMethodInfoVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitMethodInsn(int opcode, String owner, String name,
-                                String desc, boolean itf) {
+    void visitMethodInsn(int opcode, String owner, String name,
+                         String desc, boolean itf) {
         if (api < Opcodes.ASM5) {
             super.visitMethodInsn(opcode, owner, name, desc, itf);
             return;
@@ -88,54 +87,54 @@ class AccessMethodInfoVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
-                                       Object... bsmArgs) {
+    void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
+                                Object... bsmArgs) {
         super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
         instructions.add(new InvokeDynamicInsnNode(name, desc, bsm, bsmArgs));
     }
 
     @Override
-    public void visitJumpInsn(final int opcode, final Label label) {
+    void visitJumpInsn(final int opcode, final Label label) {
         super.visitJumpInsn(opcode, label);
         instructions.add(new JumpInsnNode(opcode, getLabelNode(label)));
     }
 
     @Override
-    public void visitLabel(final Label label) {
+    void visitLabel(final Label label) {
         super.visitLabel(label);
         instructions.add(getLabelNode(label));
     }
 
     @Override
-    public void visitLdcInsn(final Object cst) {
+    void visitLdcInsn(final Object cst) {
         super.visitLdcInsn(cst);
         instructions.add(new LdcInsnNode(cst));
     }
 
     @Override
-    public void visitIincInsn(final int var, final int increment) {
+    void visitIincInsn(final int var, final int increment) {
         super.visitIincInsn(var, increment);
         instructions.add(new IincInsnNode(var, increment));
     }
 
     @Override
-    public void visitTableSwitchInsn(final int min, final int max,
-                                     final Label dflt, final Label... labels) {
+    void visitTableSwitchInsn(final int min, final int max,
+                              final Label dflt, final Label... labels) {
         super.visitTableSwitchInsn(min, max, dflt, labels);
         instructions.add(new TableSwitchInsnNode(min, max, getLabelNode(dflt),
                 getLabelNodes(labels)));
     }
 
     @Override
-    public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-                                      final Label[] labels) {
+    void visitLookupSwitchInsn(final Label dflt, final int[] keys,
+                               final Label[] labels) {
         super.visitLookupSwitchInsn(dflt, keys, labels);
         instructions.add(new LookupSwitchInsnNode(getLabelNode(dflt), keys,
                 getLabelNodes(labels)));
     }
 
     @Override
-    public void visitMultiANewArrayInsn(final String desc, final int dims) {
+    void visitMultiANewArrayInsn(final String desc, final int dims) {
         super.visitMultiANewArrayInsn(desc, dims);
         instructions.add(new MultiANewArrayInsnNode(desc, dims));
     }
@@ -204,8 +203,8 @@ class AccessMethodInfoVisitor extends MethodVisitor {
                     if (shouldSkipVarInsn) {
                         shouldSkipVarInsn = false;
                         MethodInsnNode methodInsnNode = (MethodInsnNode) insnNode;
-                        int parameterCountOfTargetMethod = TypeUtil.getParameterCountFromMethodDesc(methodInsnNode.desc);
-                        int parameterCountOfAccess$Method = TypeUtil.getParameterCountFromMethodDesc(accessMethodInfo.desc);
+                        int parameterCountOfTargetMethod = Utils.getParameterCountFromMethodDesc(methodInsnNode.desc);
+                        int parameterCountOfAccess$Method = Utils.getParameterCountFromMethodDesc(accessMethodInfo.desc);
                         switch (insnNode.getOpcode()) {
                             case Opcodes.INVOKEVIRTUAL:
                             case Opcodes.INVOKESPECIAL:
@@ -237,7 +236,7 @@ class AccessMethodInfoVisitor extends MethodVisitor {
                     if (shouldSkipVarInsn) {
                         shouldSkipVarInsn = false;
                         FieldInsnNode fieldInsnNode = (FieldInsnNode) insnNode;
-                        int parameterCountOfAccess$Method = TypeUtil.getParameterCountFromMethodDesc(accessMethodInfo.desc);
+                        int parameterCountOfAccess$Method = Utils.getParameterCountFromMethodDesc(accessMethodInfo.desc);
                         switch (insnNode.getOpcode()) {
                             case Opcodes.GETSTATIC:
                                 if (parameterCountOfAccess$Method != 0
@@ -286,17 +285,6 @@ class AccessMethodInfoVisitor extends MethodVisitor {
     @Override
     void visitEnd() {
         super.visitEnd()
-
-//        if ((accessMethodInfo.readFieldInfo != null) || (accessMethodInfo.invokeMethodInfoList != null)) {
-//            if (instructions.size() > 6) {
-//                print(className + ", accessMethodInfo = " + )
-//                printInstructions()
-//                throw IllegalAccessException()
-//            }
-//            printInstructions()
-//            AccessMethodInlineProcessor.getInstance()
-//                    .appendInlineMethod(className, methodName, accessMethodInfo)
-//        }
 
         def refinedList = refine(instructions)
         if (!refinedList.isEmpty()) {

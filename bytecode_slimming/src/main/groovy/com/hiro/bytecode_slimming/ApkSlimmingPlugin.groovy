@@ -15,7 +15,7 @@ class ApkSlimmingPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        println "BytecodeSlimming, version: 1.1.6"
+        println "BytecodeSlimming, version: 1.1.8"
         def androidExtension = project.extensions.getByType(AppExtension)
         def apkSlimmingTransform = new ApkSlimmingTransform(project)
         def processorManager = ProcessorManager.getInstance()

@@ -9,6 +9,11 @@ import org.objectweb.asm.tree.AbstractInsnNode
 
 /**
  * 用这个类来进行第三步中方法指令的改变，从 invokestatic -> getfield，或者 invokestatic -> invokevirtual
+ * 要么将方法中调用 access$xxx 方法的地方改为直接执行 access$xxx 方法的指令
+ * 要么将 access$xxx 内部调用的某个方法的其他调用点改为 invokevirtual 指令，例：
+ * 如果 access$xxx 方法中调用的是某个名字为 yyy 的 private 方法，
+ * 则需要把该类在其他地方调用 yyy 方法的指令从 invokespecial 改为 invokevirtual（因为 yyy 已经变为 public 修饰了，需要保持 java 多态的特性）
+ *
  * @author hongweiqiu
  */
 class MethodInstructionChangeVisitor extends MethodVisitor {

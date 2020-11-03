@@ -25,6 +25,26 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
     private AccessMethodInlineProcessor() {
     }
 
+    /**
+     * 通过类名获取类文件绝对路径
+     */
+    def getClassFilePath(String className) {
+        if (Utils.isEmpty(className)) {
+            return null
+        }
+        return className2ClassFilePathMap.get(className)
+    }
+
+    /**
+     * 通过类名获取对应的父类名
+     */
+    def getSuperClass(String className) {
+        if (Utils.isEmpty(className)) {
+            return null
+        }
+        return className2SuperClassNameMap.get(className)
+    }
+
     void appendOptimizeClassFile(String className) {
         if (className == null
                 || needOptimizeClassNameRecorder.containsKey(className)) {
@@ -33,6 +53,9 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor {
         needOptimizeClassNameRecorder.put(className, true)
     }
 
+    /**
+     * 通过类名和方法名获取对应的 access$xxx 方法信息
+     */
     def getAccessMethodInfo(def className, def methodName) {
         if (Utils.isEmpty(className) || Utils.isEmpty(methodName)) {
             return null
