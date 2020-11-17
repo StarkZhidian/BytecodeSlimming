@@ -1,6 +1,7 @@
 package com.hiro.bytecode_slimming.getter_setter_inline
 
 import com.hiro.bytecode_slimming.BaseClassVisitor
+import com.hiro.bytecode_slimming.Logger
 import com.hiro.bytecode_slimming.ProcessorManager
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassVisitor
@@ -33,7 +34,7 @@ class GetterSetterInlineSecondClassVisitor extends BaseClassVisitor {
         getterSetterInlineProcessor.methodInlineInfoMap.values().each { getterSetterMethodInfo ->
             if (!resultVisitor[0]
                     && isSameField(getterSetterMethodInfo.readFieldInfo, className, name, desc)) {
-                println "$TAG, changeFieldAccess2Public: " + getterSetterMethodInfo.readFieldInfo
+                Logger.d1(TAG, "changeFieldAccess2Public: " + getterSetterMethodInfo.readFieldInfo)
                 // 匹配成功，设置字段 flag 中的 ACC_PUBLIC 标识
                 super.visitField(makePublicFlag(access), name, desc, signature, value)
                 resultVisitor[0] = true
@@ -58,7 +59,7 @@ class GetterSetterInlineSecondClassVisitor extends BaseClassVisitor {
                     && (Utils.textEquals(getterSetterMethodInfo.className, className))
                     && (Utils.textEquals(getterSetterMethodInfo.methodName, name))
                     && (Utils.textEquals(getterSetterMethodInfo.desc, desc))) {
-                println "$TAG, need2DeleteMethod: " + getterSetterMethodInfo
+                Logger.d1(TAG, "need2DeleteMethod: " + getterSetterMethodInfo)
                 resultMethodVisitor[0] = true
             }
         }

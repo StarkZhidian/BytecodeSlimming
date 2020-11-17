@@ -30,5 +30,17 @@ public class MainActivity extends Activity {
                 msg.length();
             }
         });
+        new OperateSuperFieldInnerClass().visitField();
+    }
+
+    /**
+     * 内部类访问外部类 android 源码父类中的 protected 字段禁止内联测试
+     */
+    private class OperateSuperFieldInnerClass {
+
+        void visitField() {
+            int[] focusedStateSet = FOCUSED_STATE_SET;
+            Log.d(TAG, "" + focusedStateSet);
+        }
     }
 }

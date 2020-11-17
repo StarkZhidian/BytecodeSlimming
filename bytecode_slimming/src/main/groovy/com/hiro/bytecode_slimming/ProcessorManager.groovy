@@ -12,6 +12,7 @@ class ProcessorManager {
     static final def KEY_ACCESS_METHOD_INLINE = "access_method_inline_processor"
     static final def KEY_NOT_RUNTIME_ANNOTATION_REMOVE = "not_runtime_annotation_remove_processor"
     static final def KEY_GETTER_SETTER_METHOD_INLINE = "getter_setter_method_inline_processor"
+    static final def KEY_LINE_NUMBER_SAVE = "line_number_save_processor"
 
     private Map<String, BaseProcessor> processorMap = new HashMap<>()
 

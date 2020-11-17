@@ -1,6 +1,7 @@
 package com.hiro.bytecode_slimming.accessinline
 
 import com.hiro.bytecode_slimming.BaseClassVisitor
+import com.hiro.bytecode_slimming.Logger
 import com.hiro.bytecode_slimming.ProcessorManager
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassVisitor
@@ -33,7 +34,7 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
             // 每个字段只操作一次，需要通过 resultMethodVisitor[0] 的值来过滤
             if (!resultVisitor[0]
                     && isOperateFieldMember(accessMethodInfo.operateFieldInfoList, className, name, desc)) {
-                println "$TAG, changeFieldAccess2Public: " + accessMethodInfo.operateFieldInfoList
+                Logger.d1(TAG, "changeFieldAccess2Public: " + accessMethodInfo.operateFieldInfoList)
                 // 匹配成功，将字段改成 public 的
                 super.visitField(Utils.toPublic(access), name, desc, signature, value)
                 resultVisitor[0] = true
@@ -54,21 +55,18 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
         def accessMethodProcessor = AccessMethodInlineProcessor.getInstance()
         // 遍历已经记录的所有方法
         accessMethodProcessor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
-            if (!AccessMethodInlineFirstClassVisitor.accessMethodCanDelete(accessMethodInfo)) {
-                return
-            }
             // 匹配到要删除的 access$xxx 方法，方法只删除一次，通过 resultMethodVisitor[0] 的值来过滤
             if (!resultMethodVisitor[0]
                     && ((accesses[0] & Opcodes.ACC_SYNTHETIC) == Opcodes.ACC_SYNTHETIC)
                     && (Utils.textEquals(accessMethodInfo.className, className))
                     && (Utils.textEquals(accessMethodInfo.methodName, name))
                     && (Utils.textEquals(accessMethodInfo.desc, desc))) {
-                println "$TAG, need2DeleteMethod: " + accessMethodInfo
+                Logger.d1(TAG, "need2DeleteMethod: " + accessMethodInfo)
                 resultMethodVisitor[0] = true
             } else if (isInvokeMethodMember(accessMethodInfo.invokeMethodInfoList, className, name, desc)) {
                 // 匹配到 access$xxx 方法调用的 private 方法，改成 public 访问权限
                 accesses[0] = Utils.toPublic(accesses[0])
-                println "$TAG, changeMethodAccess2Public: " + accessMethodInfo.invokeMethodInfoList
+                Logger.d1(TAG, "changeMethodAccess2Public: " + accessMethodInfo.invokeMethodInfoList)
             }
         }
         // 如果 resultMethodVisitor[0] 为 false，证明没有匹配到要删除的方法，返回自定义的方法访问器
@@ -129,8 +127,7 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
                 return true
             }
             // 循环判断是否为父子类关系
-            superClassName = AccessMethodInlineProcessor.getInstance()
-                    .className2SuperClassNameMap.get(superClassName)
+            superClassName = AccessMethodInlineProcessor.getInstance().getSuperClass(superClassName)
         }
         return false
     }

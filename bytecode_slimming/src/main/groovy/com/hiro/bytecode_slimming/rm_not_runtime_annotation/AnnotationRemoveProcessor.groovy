@@ -1,6 +1,7 @@
 package com.hiro.bytecode_slimming.rm_not_runtime_annotation
 
 import com.hiro.bytecode_slimming.BaseProcessor
+import com.hiro.bytecode_slimming.ClassModel
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
@@ -20,12 +21,12 @@ class AnnotationRemoveProcessor extends BaseProcessor {
     }
 
     @Override
-    void onAcceptClassFiles(List<File> classList) {
-        classList.each { File classFile ->
-            ClassReader cr = new ClassReader(classFile.bytes)
+    void onAccept(List<ClassModel> classModelList) {
+        classModelList.each {classModel ->
+            ClassReader cr = new ClassReader(classModel.fileBytes)
             ClassWriter classWriter = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
             cr.accept(new ClassAnnotationRmVisitor(Opcodes.ASM6, classWriter), ClassReader.EXPAND_FRAMES)
-            Utils.write2File(classWriter.toByteArray(), classFile)
+            Utils.write2File(classWriter.toByteArray(), classModel.classFile)
         }
     }
 

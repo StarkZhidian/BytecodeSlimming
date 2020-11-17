@@ -9,13 +9,18 @@ import org.gradle.api.Project
 
 /**
  * bytecode_slimming 插件入口
+ *
+ * TODO 使用该插件需禁用 R8 构建
+ *
  * @author hongweiqiu
  */
 class ApkSlimmingPlugin implements Plugin<Project> {
+    private static final String TAG = "ApkSlimmingPlugin"
 
     @Override
     void apply(Project project) {
-        println "BytecodeSlimming, version: 1.1.8"
+        Logger.setLogLevel(Logger.LOG_LEVEL_2)
+        Logger.d3(TAG, "BytecodeSlimming, version: 1.2.0")
         def androidExtension = project.extensions.getByType(AppExtension)
         def apkSlimmingTransform = new ApkSlimmingTransform(project)
         def processorManager = ProcessorManager.getInstance()

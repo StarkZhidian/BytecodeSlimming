@@ -1,21 +1,25 @@
 package com.hiro.bytecode_slimming.accessinline
+
+import com.hiro.bytecode_slimming.getter_setter_inline.GetterSetterMethodInfo
+import org.objectweb.asm.tree.AbstractInsnNode
+
 /**
  * 描述 access$xxx 方法信息的类
  */
 class AccessMethodInfo {
 
     /* access$xxx 方法所在的类名 */
-    def className
+    final String className
     /* access$xxx 的方法名 */
-    def methodName
+    final String methodName
     /* 方法的描述（java 层的方法签名除去方法名） */
-    def desc
+    final String desc
     /* access$xxx 方法内部访问(通过 getfield 指令)的字段 */
-    def operateFieldInfoList = new ArrayList()
+    List<OperateFieldInfo> operateFieldInfoList = new LinkedList<>()
     /* access$xxx 方法内部通过 invokespecial 指令调用方法信息 */
-    def invokeMethodInfoList = new ArrayList()
+    List<InvokeMethodInfo> invokeMethodInfoList = new LinkedList()
     /* 当前 access$xxx 方法内部相关指令列表 */
-    def instructions
+    List<AbstractInsnNode> instructions = new LinkedList<>()
 
     AccessMethodInfo(def className, def methodName, def desc) {
         this.className = className
@@ -37,6 +41,12 @@ class AccessMethodInfo {
         invokeMethodInfoList.add(invokeMethodInfo)
     }
 
+    void setInstructions(List<AbstractInsnNode> instructions) {
+        if (instructions != null) {
+            this.instructions = instructions
+        }
+    }
+
     @Override
     String toString() {
         return "{className: $className, methodName: $methodName, desc: $desc, operateFieldInfoList: " + operateFieldInfoList + ", invokeMethodInfoList: " + invokeMethodInfoList + "}"
@@ -46,12 +56,12 @@ class AccessMethodInfo {
      * 记录 access$xxx 方法内部访问的字段信息
      */
     static class OperateFieldInfo {
-        def opcode
-        def fieldClassName
-        def fieldName
-        def desc
+        int opcode
+        String fieldClassName
+        String fieldName
+        String desc
 
-        OperateFieldInfo(def opcode, def fieldClassName, def fieldName, def desc) {
+        OperateFieldInfo(int opcode, String fieldClassName, String fieldName, String desc) {
             this.opcode = opcode
             this.fieldClassName = fieldClassName
             this.fieldName = fieldName
@@ -68,12 +78,12 @@ class AccessMethodInfo {
      * 记录 access$xxx 方法内部调用的方法信息
      */
     static class InvokeMethodInfo {
-        def opcode
-        def methodClassName
-        def methodName
-        def desc
+        int opcode
+        String methodClassName
+        String methodName
+        String desc
 
-        InvokeMethodInfo(def opcode, def methodClassName, def methodName, def desc) {
+        InvokeMethodInfo(int opcode, String methodClassName, String methodName, String desc) {
             this.opcode = opcode
             this.methodClassName = methodClassName
             this.methodName = methodName

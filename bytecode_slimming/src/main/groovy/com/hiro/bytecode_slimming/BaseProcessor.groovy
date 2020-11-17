@@ -1,9 +1,5 @@
 package com.hiro.bytecode_slimming
 
-import com.android.build.api.transform.Context
-import com.android.build.api.transform.TransformInput
-import com.android.build.api.transform.TransformOutputProvider
-
 /**
  * 基础的 class/jar 文件处理器
  * @author hongweiqiu
@@ -18,41 +14,12 @@ abstract class BaseProcessor {
      * 处理器开始时回调的方法，将 optimizeCount 清 0
      */
     final void optimizeStart() {
-        optimizeCount = 0;
+        Logger.d3(TAG, "处理器 [$this] 优化开始")
+        optimizeCount = 0
         onOptimizeStart()
     }
 
     void onOptimizeStart() {
-    }
-
-    void transform(Context context, Collection<TransformInput> inputs,
-                   Collection<TransformInput> referencedInputs,
-                   TransformOutputProvider outputProvider,
-                   boolean isIncremental) {
-        // do nothing
-    }
-
-    final void acceptJarFiles(List<File> jarList) {
-        if (jarList == null || jarList.isEmpty()) {
-            return
-        }
-        onAcceptJarFiles(jarList)
-    }
-
-    /**
-     * 在这个方法里面进行具体的 jar 文件处理逻辑，处理完成后，
-     * 需要将处理后的数据覆盖写入同一个的 jar 文件中（处理的哪个文件就写入哪个文件），否则处理不会生效
-     * @param jarList jar 文件列表
-     */
-    void onAcceptJarFiles(List<File> jarList) {
-        // do nothing
-    }
-
-    final void acceptClassFiles(List<File> classList) {
-        if (classList == null || classList.isEmpty()) {
-            return
-        }
-        onAcceptClassFiles(classList)
     }
 
     /**
@@ -60,7 +27,14 @@ abstract class BaseProcessor {
      * 需要将处理后的数据覆盖写入同一个的 class 文件中（处理的哪个文件就写入哪个文件），否则处理不会生效
      * @param classList class 文件列表
      */
-    void onAcceptClassFiles(List<File> classList) {
+    final void accept(List<ClassModel> classModelList) {
+        if (classModelList == null || classModelList.isEmpty()) {
+            return
+        }
+        onAccept(classModelList)
+    }
+
+    void onAccept(List<ClassModel> classModelList) {
         // do nothing
     }
 
@@ -68,7 +42,7 @@ abstract class BaseProcessor {
      * 在 jar 和 class 文件都处理完了之后会回调的方法
      */
     final void optimizeEnd() {
-        println "$TAG, 处理器：[$this] 运行结束，共优化了: $optimizeCount 项"
+        Logger.d3(TAG, "处理器：[$this] 运行结束，共优化了: $optimizeCount 项")
         onOptimizeEnd()
     }
 

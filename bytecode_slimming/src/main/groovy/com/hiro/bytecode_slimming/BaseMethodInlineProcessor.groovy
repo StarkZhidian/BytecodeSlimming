@@ -1,11 +1,11 @@
 package com.hiro.bytecode_slimming
+
 /**
  * 基础的方法内联处理器
- * @author hongweiqiu
  */
 class BaseMethodInlineProcessor extends BaseProcessor {
 
-    Map<String, Object> methodInlineInfoMap = new HashMap<>()
+    final Map<String, Object> methodInlineInfoMap = new HashMap<>()
 
     /**
      * 添加一个需要内联的方法信息
@@ -20,7 +20,7 @@ class BaseMethodInlineProcessor extends BaseProcessor {
         methodInlineInfoMap.put(makeInlineMethodInfoKey(className, methodName), inlineMethodInfo)
     }
 
-    static def makeInlineMethodInfoKey(def className, def methodName) {
+    protected static def makeInlineMethodInfoKey(def className, def methodName) {
         return className + "#" + methodName
     }
 

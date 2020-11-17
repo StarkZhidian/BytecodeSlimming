@@ -1,5 +1,7 @@
 package com.hiro.bytecode_slimming.accessinline
 
+import com.hiro.bytecode_slimming.BaseMethodVisitor
+import com.hiro.bytecode_slimming.Logger
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Label
@@ -12,36 +14,31 @@ import org.objectweb.asm.tree.*
  *
  * @author hongweiqiu
  */
-class AccessMethodInfoVisitor extends MethodVisitor {
+class AccessMethodInfoVisitor extends BaseMethodVisitor {
 
     private static final def TAG = "AccessMethodInfoVisitor"
 
-    /* 当前访问的 access$xxx 方法所属的类 */
-    def className;
-    /* 当前访问的 access$xxx 方法名 */
-    def methodName;
     /* 记录当前方法的相关信息 */
-    def accessMethodInfo
-    def instructions = new ArrayList()
+    AccessMethodInfo accessMethodInfo
+    /* 当前访问的 access$xxx 方法内部的相关指令暂存器 */
+    List<AbstractInsnNode> instructions = new ArrayList()
 
-    AccessMethodInfoVisitor(int api, MethodVisitor mv, def className,
-                            int access, def methodName, def desc, def signature, def exceptions) {
-        super(api, mv)
-        this.className = className
-        this.methodName = methodName
+    AccessMethodInfoVisitor(int api, MethodVisitor mv, String className,
+                            int access, String methodName, String desc, String signature, String[] exceptions) {
+        super(api, mv, className, access, methodName, desc, signature, exceptions)
         accessMethodInfo = new AccessMethodInfo(className, methodName, desc)
     }
 
     @Override
     void visitInsn(final int opcode) {
-        super.visitInsn(opcode);
-        instructions.add(new InsnNode(opcode));
+        super.visitInsn(opcode)
+        instructions.add(new InsnNode(opcode))
     }
 
     @Override
     void visitIntInsn(final int opcode, final int operand) {
-        super.visitIntInsn(opcode, operand);
-        instructions.add(new IntInsnNode(opcode, operand));
+        super.visitIntInsn(opcode, operand)
+        instructions.add(new IntInsnNode(opcode, operand))
     }
 
     @Override
@@ -52,15 +49,15 @@ class AccessMethodInfoVisitor extends MethodVisitor {
 
     @Override
     void visitTypeInsn(final int opcode, final String type) {
-        super.visitTypeInsn(opcode, type);
-        instructions.add(new TypeInsnNode(opcode, type));
+        super.visitTypeInsn(opcode, type)
+        instructions.add(new TypeInsnNode(opcode, type))
     }
 
     @Override
     void visitFieldInsn(final int opcode, final String owner,
                         final String name, final String desc) {
-        super.visitFieldInsn(opcode, owner, name, desc);
-        instructions.add(new FieldInsnNode(opcode, owner, name, desc));
+        super.visitFieldInsn(opcode, owner, name, desc)
+        instructions.add(new FieldInsnNode(opcode, owner, name, desc))
     }
 
     @Deprecated
@@ -68,59 +65,59 @@ class AccessMethodInfoVisitor extends MethodVisitor {
     void visitMethodInsn(int opcode, String owner, String name,
                          String desc) {
         if (api >= Opcodes.ASM5) {
-            super.visitMethodInsn(opcode, owner, name, desc);
-            return;
+            super.visitMethodInsn(opcode, owner, name, desc)
+            return
         }
-        super.visitMethodInsn(opcode, owner, name, desc);
-        instructions.add(new MethodInsnNode(opcode, owner, name, desc));
+        super.visitMethodInsn(opcode, owner, name, desc)
+        instructions.add(new MethodInsnNode(opcode, owner, name, desc))
     }
 
     @Override
     void visitMethodInsn(int opcode, String owner, String name,
                          String desc, boolean itf) {
         if (api < Opcodes.ASM5) {
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
-            return;
+            super.visitMethodInsn(opcode, owner, name, desc, itf)
+            return
         }
-        super.visitMethodInsn(opcode, owner, name, desc, itf);
-        instructions.add(new MethodInsnNode(opcode, owner, name, desc, itf));
+        super.visitMethodInsn(opcode, owner, name, desc, itf)
+        instructions.add(new MethodInsnNode(opcode, owner, name, desc, itf))
     }
 
     @Override
     void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
                                 Object... bsmArgs) {
-        super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
-        instructions.add(new InvokeDynamicInsnNode(name, desc, bsm, bsmArgs));
+        super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs)
+        instructions.add(new InvokeDynamicInsnNode(name, desc, bsm, bsmArgs))
     }
 
     @Override
     void visitJumpInsn(final int opcode, final Label label) {
-        super.visitJumpInsn(opcode, label);
-        instructions.add(new JumpInsnNode(opcode, getLabelNode(label)));
+        super.visitJumpInsn(opcode, label)
+        instructions.add(new JumpInsnNode(opcode, getLabelNode(label)))
     }
 
     @Override
     void visitLabel(final Label label) {
-        super.visitLabel(label);
-        instructions.add(getLabelNode(label));
+        super.visitLabel(label)
+        instructions.add(getLabelNode(label))
     }
 
     @Override
     void visitLdcInsn(final Object cst) {
-        super.visitLdcInsn(cst);
-        instructions.add(new LdcInsnNode(cst));
+        super.visitLdcInsn(cst)
+        instructions.add(new LdcInsnNode(cst))
     }
 
     @Override
     void visitIincInsn(final int var, final int increment) {
-        super.visitIincInsn(var, increment);
-        instructions.add(new IincInsnNode(var, increment));
+        super.visitIincInsn(var, increment)
+        instructions.add(new IincInsnNode(var, increment))
     }
 
     @Override
     void visitTableSwitchInsn(final int min, final int max,
                               final Label dflt, final Label... labels) {
-        super.visitTableSwitchInsn(min, max, dflt, labels);
+        super.visitTableSwitchInsn(min, max, dflt, labels)
         instructions.add(new TableSwitchInsnNode(min, max, getLabelNode(dflt),
                 getLabelNodes(labels)));
     }
@@ -128,48 +125,47 @@ class AccessMethodInfoVisitor extends MethodVisitor {
     @Override
     void visitLookupSwitchInsn(final Label dflt, final int[] keys,
                                final Label[] labels) {
-        super.visitLookupSwitchInsn(dflt, keys, labels);
-        instructions.add(new LookupSwitchInsnNode(getLabelNode(dflt), keys,
-                getLabelNodes(labels)));
+        super.visitLookupSwitchInsn(dflt, keys, labels)
+        instructions.add(new LookupSwitchInsnNode(getLabelNode(dflt), keys, getLabelNodes(labels)))
     }
 
     @Override
     void visitMultiANewArrayInsn(final String desc, final int dims) {
-        super.visitMultiANewArrayInsn(desc, dims);
-        instructions.add(new MultiANewArrayInsnNode(desc, dims));
+        super.visitMultiANewArrayInsn(desc, dims)
+        instructions.add(new MultiANewArrayInsnNode(desc, dims))
     }
 
     protected LabelNode getLabelNode(final Label l) {
         if (!(l.info instanceof LabelNode)) {
-            l.info = new LabelNode();
+            l.info = new LabelNode()
         }
-        return (LabelNode) l.info;
+        return (LabelNode) l.info
     }
 
     private LabelNode[] getLabelNodes(final Label[] l) {
-        LabelNode[] nodes = new LabelNode[l.length];
+        LabelNode[] nodes = new LabelNode[l.length]
         for (int i = 0; i < l.length; ++i) {
-            nodes[i] = getLabelNode(l[i]);
+            nodes[i] = getLabelNode(l[i])
         }
         return nodes;
     }
 
     private Object[] getLabelNodes(final Object[] objs) {
-        Object[] nodes = new Object[objs.length];
+        Object[] nodes = new Object[objs.length]
         for (int i = 0; i < objs.length; ++i) {
-            Object o = objs[i];
+            Object o = objs[i]
             if (o instanceof Label) {
-                o = getLabelNode((Label) o);
+                o = getLabelNode((Label) o)
             }
-            nodes[i] = o;
+            nodes[i] = o
         }
-        return nodes;
+        return nodes
     }
 
-    private List<AbstractInsnNode> refine(List<AbstractInsnNode> instructions) {
-        List<AbstractInsnNode> refinedInsns = new ArrayList<>();
-        boolean shouldSkipVarInsn = true;
-        int varLoadInsnCount = 0;
+    private List<AbstractInsnNode> refineInstructions(List<AbstractInsnNode> instructions) {
+        List<AbstractInsnNode> refinedInsns = new ArrayList<>()
+        boolean shouldSkipVarInsn = true
+        int varLoadInsnCount = 0
         try {
             for (AbstractInsnNode insnNode : instructions) {
                 if (insnNode.getType() == AbstractInsnNode.LINE) continue;
@@ -276,8 +272,8 @@ class AccessMethodInfoVisitor extends MethodVisitor {
                 }
             }
         } catch (ShouldSkipInlineException e) {
-            e.printStackTrace()
-            refinedInsns.clear();
+            Logger.e(TAG, "refineInstructions", e)
+            refinedInsns.clear()
         }
         return refinedInsns;
     }
@@ -286,7 +282,7 @@ class AccessMethodInfoVisitor extends MethodVisitor {
     void visitEnd() {
         super.visitEnd()
 
-        def refinedList = refine(instructions)
+        def refinedList = refineInstructions(instructions)
         if (!refinedList.isEmpty()) {
             accessMethodInfo.instructions = refinedList
             AccessMethodInlineProcessor.getInstance()
@@ -295,13 +291,13 @@ class AccessMethodInfoVisitor extends MethodVisitor {
     }
 
     void printInstructions() {
-        println "$TAG, instructions size = " + instructions.size()
+        Logger.d1(TAG, "instructions size = " + instructions.size())
         for (int i = 0; i < instructions.size(); i++) {
-            println("$TAG, printInstructions i = [" + instructions.get(i).getOpcode() + "]")
+            Logger.d1(TAG, "printInstructions i = [" + instructions.get(i).getOpcode() + "]")
         }
     }
 
-    def isInnerOuterClass(String anotherClassName) {
+    private def isInnerOuterClass(String anotherClassName) {
         if (Utils.isEmpty(anotherClassName)) {
             return false
         }

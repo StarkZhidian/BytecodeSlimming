@@ -1,5 +1,6 @@
 package com.hiro.bytecode_slimming.rm_not_runtime_annotation
 
+import com.hiro.bytecode_slimming.Logger
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -23,7 +24,7 @@ class ClassAnnotationRmVisitor extends ClassVisitor {
 
     @Override
     void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        // println "$TAG, version: $version, access: $access, name: $name, signature: $signature, superName: $superName, interfaces: $interfaces"
+//        Logger.d1(TAG, "version: $version, access: $access, name: $name, signature: $signature, superName: $superName, interfaces: $interfaces")
         super.visit(version, access, name, signature, superName, interfaces)
     }
 
@@ -31,7 +32,7 @@ class ClassAnnotationRmVisitor extends ClassVisitor {
     AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         // 如果该注解运行时不可见（即为非 runtime 作用域的注解，则删除）
         if (!visible) {
-            println "$TAG, visitAnnotation, desc: $desc, visible: $visible"
+            Logger.d1(TAG, "visitAnnotation, desc: $desc, visible: $visible")
             AnnotationRemoveProcessor.getInstance().increaseOptimizeCount()
             return null
         }
