@@ -41,6 +41,7 @@ public class MainActivity extends Activity {
         void visitField() {
             int[] focusedStateSet = FOCUSED_STATE_SET;
             Log.d(TAG, "" + focusedStateSet);
+            Log.d(TAG, "" + helloTv);
         }
     }
 }

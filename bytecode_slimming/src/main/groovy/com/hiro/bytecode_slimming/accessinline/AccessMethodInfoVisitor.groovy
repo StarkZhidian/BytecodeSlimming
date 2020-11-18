@@ -284,9 +284,16 @@ class AccessMethodInfoVisitor extends BaseMethodVisitor {
 
         def refinedList = refineInstructions(instructions)
         if (!refinedList.isEmpty()) {
-            accessMethodInfo.instructions = refinedList
-            AccessMethodInlineProcessor.getInstance()
-                    .appendInlineMethod(className, methodName, accessMethodInfo)
+            AccessMethodInfo existsInlineMethod = AccessMethodInlineProcessor.getInstance()
+                    .getOrNewAccessMethodInfo(className, methodName, desc)
+            if (existsInlineMethod == null) {
+                // something was wrong, show stacktrace and return
+                Logger.e(TAG, "visitEnd, got className, methodName or desc is empty!", new Throwable())
+                return
+            }
+            existsInlineMethod.operateFieldInfoList = accessMethodInfo.operateFieldInfoList
+            existsInlineMethod.invokeMethodInfoList = accessMethodInfo.invokeMethodInfoList
+            existsInlineMethod.instructions = refinedList
         }
     }
 

@@ -59,8 +59,7 @@ class GetterSetterInlineFirstMethodVisitor extends BaseMethodVisitor {
             getterSetterMethodInfo.readFieldInfo =
                     new GetterSetterMethodInfo.OperateFieldInfo(opcode, fieldOwner, fieldName, fieldDesc)
             GetterSetterInlineProcessor
-                    .getInstance()
-                    .appendInlineMethod(className, methodName, getterSetterMethodInfo)
+                    .getInstance().appendInlineMethod(className, methodName, desc, getterSetterMethodInfo)
         }
     }
 }

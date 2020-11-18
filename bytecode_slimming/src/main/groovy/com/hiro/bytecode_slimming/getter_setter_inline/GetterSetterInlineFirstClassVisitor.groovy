@@ -38,7 +38,7 @@ class GetterSetterInlineFirstClassVisitor extends BaseClassVisitor {
      * 一个正常的 setter 方法一般是：
      * public XXX getXXX() {*}* @param access 访问标识
      * @param name 方法名
-     * @param desc 方法 JVM 层签名
+     * @param desc 方法 JVM 层描述
      */
     private def isGetterMethod(int access, String name, String desc) {
         return (((access & Opcodes.ACC_PUBLIC) == Opcodes.ACC_PUBLIC)

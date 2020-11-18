@@ -12,6 +12,9 @@ public class DoNothingView extends View  {
 
     private DoMeasureInnerClass doMeasureInnerClass = new DoMeasureInnerClass();
 
+    /* 子类内部类访问的字段产生的 access$ 方法内联测试 */
+    protected int subclassVisitField;
+
     public DoNothingView(Context context) {
         super(context);
     }

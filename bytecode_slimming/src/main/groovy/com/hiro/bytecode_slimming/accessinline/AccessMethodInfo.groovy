@@ -1,6 +1,6 @@
 package com.hiro.bytecode_slimming.accessinline
 
-import com.hiro.bytecode_slimming.getter_setter_inline.GetterSetterMethodInfo
+import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.tree.AbstractInsnNode
 
 /**
@@ -20,6 +20,8 @@ class AccessMethodInfo {
     List<InvokeMethodInfo> invokeMethodInfoList = new LinkedList()
     /* 当前 access$xxx 方法内部相关指令列表 */
     List<AbstractInsnNode> instructions = new LinkedList<>()
+    /* 关联的类名列表 */
+    List<String> relatedClassName = new LinkedList<>()
 
     AccessMethodInfo(def className, def methodName, def desc) {
         this.className = className
@@ -47,9 +49,16 @@ class AccessMethodInfo {
         }
     }
 
+    void appendRelatedClassName(String className) {
+        if (Utils.isEmpty(className) || relatedClassName.contains(className)) {
+            return
+        }
+        relatedClassName.add(className)
+    }
+
     @Override
     String toString() {
-        return "{className: $className, methodName: $methodName, desc: $desc, operateFieldInfoList: " + operateFieldInfoList + ", invokeMethodInfoList: " + invokeMethodInfoList + "}"
+        return "{className: $className, methodName: $methodName, desc: $desc, operateFieldInfoList: $operateFieldInfoList, invokeMethodInfoList: $invokeMethodInfoList, relatedClassName : $relatedClassName}"
     }
 
     /**

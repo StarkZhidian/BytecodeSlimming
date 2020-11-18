@@ -14,70 +14,51 @@ import org.objectweb.asm.Opcodes
  * @author hongweiqiu
  */
 class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
-
     private static def TAG = 'AccessMethodInlineSecondClassVisitor'
 
-    AccessMethodInlineSecondClassVisitor(int api) {
-        super(api)
-    }
+    private AccessMethodInfo accessMethodInfo
 
-    AccessMethodInlineSecondClassVisitor(int api, ClassVisitor cv) {
+    AccessMethodInlineSecondClassVisitor(int api, ClassVisitor cv, AccessMethodInfo accessMethodInfo) {
         super(api, cv)
+        this.accessMethodInfo = accessMethodInfo
     }
 
     @Override
     FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        def resultVisitor = [false]
-        def accessMethodProcessor = AccessMethodInlineProcessor.getInstance()
         // 遍历已经记录需要删除 ACC_PRIVATE 标志的所有字段
-        accessMethodProcessor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
-            // 每个字段只操作一次，需要通过 resultMethodVisitor[0] 的值来过滤
-            if (!resultVisitor[0]
-                    && isOperateFieldMember(accessMethodInfo.operateFieldInfoList, className, name, desc)) {
-                Logger.d1(TAG, "changeFieldAccess2Public: " + accessMethodInfo.operateFieldInfoList)
-                // 匹配成功，将字段改成 public 的
-                super.visitField(Utils.toPublic(access), name, desc, signature, value)
-                resultVisitor[0] = true
-            }
+        if (isOperateFieldMember(accessMethodInfo.operateFieldInfoList, className, name, desc)) {
+            Logger.d1(TAG, "changeFieldAccess2Public: " + accessMethodInfo.operateFieldInfoList)
+            // 匹配成功，将字段改成 public 的
+            access = Utils.toPublic(access)
         }
-        // 如果 resultVisitor[0] 为 false，证明没有匹配到需要删除 ACC_PRIVATE 标志的字段，
-        // 使用父类的默认处理方法
-        if (!resultVisitor[0]) {
-            return super.visitField(access, name, desc, signature, value)
-        }
-        return null;
+        return super.visitField(access, name, desc, signature, value)
     }
 
     @Override
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        def resultMethodVisitor = [false]
-        def accesses = [access]
-        def accessMethodProcessor = AccessMethodInlineProcessor.getInstance()
+        def resultMethodVisitor = false
         // 遍历已经记录的所有方法
-        accessMethodProcessor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
-            // 匹配到要删除的 access$xxx 方法，方法只删除一次，通过 resultMethodVisitor[0] 的值来过滤
-            if (!resultMethodVisitor[0]
-                    && ((accesses[0] & Opcodes.ACC_SYNTHETIC) == Opcodes.ACC_SYNTHETIC)
-                    && (Utils.textEquals(accessMethodInfo.className, className))
-                    && (Utils.textEquals(accessMethodInfo.methodName, name))
-                    && (Utils.textEquals(accessMethodInfo.desc, desc))) {
-                Logger.d1(TAG, "need2DeleteMethod: " + accessMethodInfo)
-                resultMethodVisitor[0] = true
-            } else if (isInvokeMethodMember(accessMethodInfo.invokeMethodInfoList, className, name, desc)) {
-                // 匹配到 access$xxx 方法调用的 private 方法，改成 public 访问权限
-                accesses[0] = Utils.toPublic(accesses[0])
-                Logger.d1(TAG, "changeMethodAccess2Public: " + accessMethodInfo.invokeMethodInfoList)
-            }
+        // 匹配到要删除的 access$xxx 方法，则删除，通过 resultMethodVisitor 的值来标记
+        if (((access & Opcodes.ACC_SYNTHETIC) == Opcodes.ACC_SYNTHETIC)
+                && (Utils.textEquals(accessMethodInfo.className, className))
+                && (Utils.textEquals(accessMethodInfo.methodName, name))
+                && (Utils.textEquals(accessMethodInfo.desc, desc))) {
+            Logger.d1(TAG, "need2DeleteMethod: " + accessMethodInfo)
+            resultMethodVisitor = true
+        } else if (isInvokeMethodMember(accessMethodInfo.invokeMethodInfoList, className, name, desc)) {
+            // 匹配到 access$xxx 方法调用的 private 方法，改成 public 访问权限
+            access = Utils.toPublic(access)
+            Logger.d1(TAG, "changeMethodAccess2Public: " + accessMethodInfo.invokeMethodInfoList)
         }
-        // 如果 resultMethodVisitor[0] 为 false，证明没有匹配到要删除的方法，返回自定义的方法访问器
-        if (!resultMethodVisitor[0]) {
+        // 如果 resultMethodVisitor 为 false，证明没有匹配到要删除的方法，返回自定义的方法访问器
+        if (!resultMethodVisitor) {
             return new MethodInstructionChangeVisitor(Opcodes.ASM6,
-                    super.visitMethod(accesses[0], name, desc, signature, exceptions),
-                    ProcessorManager.KEY_ACCESS_METHOD_INLINE)
+                    super.visitMethod(access, name, desc, signature, exceptions),
+                    accessMethodInfo)
         }
         // 该方法为需要删除的 access$xxx 方法，计数，同时返回 null
         AccessMethodInlineProcessor.getInstance().increaseOptimizeCount()
-        return null;
+        return null
     }
 
     static def isOperateFieldMember(List fieldInfoList, String className, String fieldName, String desc) {

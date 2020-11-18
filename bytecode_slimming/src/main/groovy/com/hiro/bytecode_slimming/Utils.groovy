@@ -37,6 +37,10 @@ class Utils {
         fos.close()
     }
 
+    static void write2File(byte[] data, String outputFilePath) {
+        write2File(data, new File(outputFilePath))
+    }
+
     static void write2File(InputStream inputStream, File outputFile) {
         if (outputFile == null || !outputFile.exists()) {
             return

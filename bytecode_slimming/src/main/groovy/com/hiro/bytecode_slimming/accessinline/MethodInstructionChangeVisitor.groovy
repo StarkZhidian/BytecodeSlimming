@@ -18,48 +18,41 @@ import org.objectweb.asm.tree.AbstractInsnNode
  */
 class MethodInstructionChangeVisitor extends MethodVisitor {
 
-    static final def TAG = 'MethodInstructionChangeVisitor'
+    private static final def TAG = 'MethodInstructionChangeVisitor'
 
-    private def processorKey
+    private AccessMethodInfo accessMethodInfo
 
-    MethodInstructionChangeVisitor(int api, MethodVisitor mv, String processorKey) {
+    MethodInstructionChangeVisitor(int api, MethodVisitor mv, AccessMethodInfo accessMethodInfo) {
         super(api, mv)
-        this.processorKey = processorKey
+        this.accessMethodInfo = accessMethodInfo
     }
 
     @Override
     void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-        def visitResult = [false]
-        def opcodes = [opcode]
-        def owners = [owner]
-        def names = [name]
-        def descs = [desc]
+        def instructionReplaceResult = false
         // 调用 access$xxx 方法的指令为 invokestatic
-        // 调用 private 方法的指令为 invokespecial，改了 private 方法为 public，
+        // 调用 private 方法的指令为 invokespecial，将方法访问权限修饰从 private 改为 public，
         // 需要把该方法的其他调用点改成 invokevirtual
         if (opcode == Opcodes.INVOKESTATIC || opcode == Opcodes.INVOKESPECIAL) {
-            def processor = ProcessorManager.getInstance().getProcessor(processorKey)
-            processor.methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
-                // 如果调用的是 access$xxx 方法的地方，则需要替换为 access$xxx 方法内部的指令
-                if (!visitResult[0]
-                        && opcode == Opcodes.INVOKESTATIC
-                        && Utils.textEquals(owner, accessMethodInfo.className)
-                        && Utils.textEquals(name, accessMethodInfo.methodName)
-                        && Utils.textEquals(desc, accessMethodInfo.desc)
-                        && accessMethodInfo.instructions != null) {
-                    for (AbstractInsnNode insnNode : accessMethodInfo.instructions) {
-                        insnNode.accept(this)
-                    }
-                    visitResult[0] = true
-                } else if (opcode == Opcodes.INVOKESPECIAL
-                        && AccessMethodInlineSecondClassVisitor.isInvokeMethodMember(accessMethodInfo.invokeMethodInfoList, owner, name, desc)) {
-                    // 调用的是 access$xxx 方法内部中调用的方法，需要将调用字节码改为 invokevirtual
-                    opcodes[0] = Opcodes.INVOKEVIRTUAL
+            // 如果调用的是 access$xxx 方法的地方，则需要替换为 access$xxx 方法内部的指令
+            if (opcode == Opcodes.INVOKESTATIC
+                    && Utils.textEquals(owner, accessMethodInfo.className)
+                    && Utils.textEquals(name, accessMethodInfo.methodName)
+                    && Utils.textEquals(desc, accessMethodInfo.desc)
+                    && accessMethodInfo.instructions != null) {
+                for (AbstractInsnNode insnNode : accessMethodInfo.instructions) {
+                    insnNode.accept(this)
                 }
+                instructionReplaceResult = true
+            } else if (opcode == Opcodes.INVOKESPECIAL
+                    && AccessMethodInlineSecondClassVisitor.isInvokeMethodMember(accessMethodInfo.invokeMethodInfoList, owner, name, desc)) {
+                // 调用的是 access$xxx 方法内部中调用的方法，需要将调用字节码改为 invokevirtual
+                opcode = Opcodes.INVOKEVIRTUAL
             }
         }
-        if (!visitResult[0]) {
-            super.visitMethodInsn(opcodes[0], owners[0], names[0], descs[0], itf)
+        // 如果 access 方法调用没有被替换为 access 方法内部的指令，则需要调用 super 逻辑
+        if (!instructionReplaceResult) {
+            super.visitMethodInsn(opcode, owner, name, desc, itf)
         }
     }
 }
