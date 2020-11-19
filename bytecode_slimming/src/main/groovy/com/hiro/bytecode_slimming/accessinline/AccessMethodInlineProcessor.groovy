@@ -1,7 +1,8 @@
 package com.hiro.bytecode_slimming.accessinline
 
 import com.hiro.bytecode_slimming.BaseMethodInlineProcessor
-import com.hiro.bytecode_slimming.ClassModel
+import com.hiro.bytecode_slimming.ClassDataManager
+import com.hiro.bytecode_slimming.SingleClassData
 import com.hiro.bytecode_slimming.Constants
 import com.hiro.bytecode_slimming.Logger
 import com.hiro.bytecode_slimming.Utils
@@ -19,10 +20,6 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
 
     private static final def TAG = "AccessMethodInlineProcessor"
 
-    /* 类名到类文件路径的映射 */
-    private Map<String, String> className2ClassFilePathMap = new HashMap<>()
-    /* 类名到父类名的映射 */
-    private Map<String, String> className2SuperClassNameMap = new HashMap<>()
     /* 类名到对应 ClassNode 的映射 */
     private Map<String, ClassNode> classNode2ClassNodeMap = new HashMap<>()
 
@@ -34,24 +31,23 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
     }
 
     /**
-     * 通过类名获取类文件绝对路径，当碰见参数为 android framework 中类的情况(或者对应的类文件不参与编译)时，
-     * 这里返回值为 null，因为 framework 中的类文件本身不参与编译，也就没有对应的文件路径
+     * 通过类名获取对应的类文件
      */
-    String getClassFilePath(String className) {
+    private static File getClassFile(String className) {
         if (Utils.isEmpty(className)) {
             return null
         }
-        return className2ClassFilePathMap.get(className)
+        return ClassDataManager.getClassFile(className)
     }
 
     /**
      * 通过类名获取对应的父类名
      */
-    String getSuperClass(String className) {
+    private static String getSuperClass(String className) {
         if (Utils.isEmpty(className)) {
             return null
         }
-        return className2SuperClassNameMap.get(className)
+        return ClassDataManager.getSuperClass(className)
     }
 
     /**
@@ -74,44 +70,8 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
         return accessMethodInfo
     }
 
-    /**
-     * 添加类名到类文件路径的映射信息 item
-     *
-     * @param className 类名
-     * @param filePath 对应的类文件路径
-     */
-    void putClassName2FilePathMapItem(String className, String filePath) {
-        if (Utils.isEmpty(className) || Utils.isEmpty(filePath)) {
-            return
-        }
-        className2ClassFilePathMap.put(className, filePath)
-    }
-
-    /**
-     * 添加类名到父类映射信息 item
-     *
-     * @param className 类名
-     * @param superClassName 父类名
-     */
-    void putClassName2SuperClassNameMapItem(String className, String superClassName) {
-        if (Utils.isEmpty(className) || Utils.isEmpty(superClassName)) {
-            return
-        }
-        className2SuperClassNameMap.put(className, superClassName)
-    }
-
-    /**
-     * 通过类名、方法名和方法描述获取对应的 access$xxx 方法信息
-     */
-    AccessMethodInfo getAccessMethodInfo(String className, String methodName, String desc) {
-        if (Utils.isEmpty(className) || Utils.isEmpty(methodName) || Utils.isEmpty(desc)) {
-            return null
-        }
-        return getInlineMethod(className, methodName, desc)
-    }
-
     @Override
-    void onAccept(List<ClassModel> classModelList) {
+    void onAccept(List<SingleClassData> classModelList) {
         // first traversal
         classModelList.each { classModel ->
             ClassReader cr = new ClassReader(classModel.fileBytes)
@@ -131,20 +91,19 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
         methodInlineInfoMap.values().each { AccessMethodInfo accessMethodInfo ->
             try {
                 tempAccessClassOutputDataMap.clear()
-                String tempClassFilePath
+                File optimizeClassFile
                 accessMethodInfo.relatedClassName.each { String relatedClassName ->
-                    tempClassFilePath = getClassFilePath(relatedClassName)
-                    if (Utils.isEmpty(tempClassFilePath)) {
+                    optimizeClassFile = getClassFile(relatedClassName)
+                    if (!Utils.isValidFile(optimizeClassFile)) {
                         return
                     }
-                    File optimizeClassFile = new File(tempClassFilePath)
                     ClassReader cr = new ClassReader(optimizeClassFile.bytes)
                     ClassWriter classWriter = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
                     cr.accept(new AccessMethodInlineSecondClassVisitor(
                             Constants.ASM_VERSION, classWriter, accessMethodInfo), ClassReader.EXPAND_FRAMES)
                     // 这里先通过 map 暂存起来 class 文件路径和对应的输出数据是为了
                     // 在某个 access$xxx 方法内联过程中发生了异常时可以方便回滚
-                    tempAccessClassOutputDataMap.put(tempClassFilePath, classWriter.toByteArray())
+                    tempAccessClassOutputDataMap.put(optimizeClassFile.absolutePath, classWriter.toByteArray())
                 }
                 // 只有完整并且正常的执行完了整个 access$xxx 方法相关类文件的处理后才一并输出到对应文件
                 tempAccessClassOutputDataMap.entrySet().each { Map.Entry<String, byte[]> entry ->
@@ -244,7 +203,6 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
         if (Utils.isEmpty(className) || Utils.isEmpty(memberName) || Utils.isEmpty(desc)) {
             throw new IllegalArgumentException(TAG + ": memberFromAndroidPackage, argument is illegal!")
         }
-        String tempClassFilePath
         File tempClassFile
         boolean[] findResult = [false]
         // className 不为空，进行查找
@@ -252,8 +210,8 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
             // fetch from cache first
             ClassNode classNode = classNode2ClassNodeMap.get(className)
             // no classNode cache was found，read it from file
-            if ((classNode == null) && (!Utils.isEmpty(tempClassFilePath = getClassFilePath(className)))
-                    && (Utils.isValidFile(tempClassFile = new File(tempClassFilePath)))) {
+            if ((classNode == null)
+                    && (Utils.isValidFile(tempClassFile = getClassFile(className)))) {
                 classNode = new ClassNode(Constants.ASM_VERSION)
                 new ClassReader(tempClassFile.bytes).accept(classNode, ClassReader.EXPAND_FRAMES)
                 // save to cache
@@ -298,7 +256,7 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
         // 如果找到了对应方法/字段成员，并且对应的类文件是参与编译的，则代表该字段的访问权限可以被我们修改
         // 这里为什么要重新获取一次 classFilePath，因为查找过程中用到的 classNode 对象可能是从缓存中取到的。
         // 所以最后判断的时候需要重新获取
-        return findResult[0] && Utils.isValidFile(new File(getClassFilePath(className)))
+        return findResult[0] && Utils.isValidFile(getClassFile(className))
     }
 
     private static class InstanceHolder {

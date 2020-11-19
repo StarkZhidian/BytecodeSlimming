@@ -1,7 +1,7 @@
 package com.hiro.bytecode_slimming.getter_setter_inline
 
 import com.hiro.bytecode_slimming.BaseMethodInlineProcessor
-import com.hiro.bytecode_slimming.ClassModel
+import com.hiro.bytecode_slimming.SingleClassData
 import com.hiro.bytecode_slimming.Utils
 import com.hiro.bytecode_slimming.Constants
 import org.objectweb.asm.ClassReader
@@ -22,7 +22,7 @@ class GetterSetterInlineProcessor extends BaseMethodInlineProcessor {
     }
 
     @Override
-    void onAccept(List<ClassModel> classModelList) {
+    void onAccept(List<SingleClassData> classModelList) {
         classModelList.each {classModel ->
             ClassReader cr = new ClassReader(classModel.fileBytes)
             cr.accept(new GetterSetterInlineFirstClassVisitor(Constants.ASM_VERSION, null), ClassReader.EXPAND_FRAMES)

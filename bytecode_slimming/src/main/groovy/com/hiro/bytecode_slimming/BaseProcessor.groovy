@@ -27,14 +27,14 @@ abstract class BaseProcessor {
      * 需要将处理后的数据覆盖写入同一个的 class 文件中（处理的哪个文件就写入哪个文件），否则处理不会生效
      * @param classList class 文件列表
      */
-    final void accept(List<ClassModel> classModelList) {
+    final void accept(List<SingleClassData> classModelList) {
         if (classModelList == null || classModelList.isEmpty()) {
             return
         }
         onAccept(classModelList)
     }
 
-    void onAccept(List<ClassModel> classModelList) {
+    void onAccept(List<SingleClassData> classModelList) {
         // do nothing
     }
 

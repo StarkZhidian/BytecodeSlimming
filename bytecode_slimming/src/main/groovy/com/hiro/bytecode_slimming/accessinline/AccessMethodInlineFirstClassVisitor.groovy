@@ -22,15 +22,6 @@ class AccessMethodInlineFirstClassVisitor extends BaseClassVisitor {
     }
 
     @Override
-    void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        super.visit(version, access, name, signature, superName, interfaces)
-        AccessMethodInlineProcessor.getInstance().putClassName2FilePathMapItem(name, classFile.absolutePath)
-        if (!Utils.textEquals(superName, "java/lang/Object")) {
-            AccessMethodInlineProcessor.getInstance().putClassName2SuperClassNameMapItem(name, superName)
-        }
-    }
-
-    @Override
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         if (isAccessMethod(access, name)) {
             Logger.d1(TAG, "visitMethod accessMthod: $access, name: $name, desc: $desc, signature: $signature, exception: $exceptions")

@@ -1,6 +1,7 @@
 package com.hiro.bytecode_slimming.accessinline
 
 import com.hiro.bytecode_slimming.BaseClassVisitor
+import com.hiro.bytecode_slimming.ClassDataManager
 import com.hiro.bytecode_slimming.Logger
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassVisitor
@@ -108,7 +109,7 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
                 return true
             }
             // 循环判断是否为父子类关系
-            superClassName = AccessMethodInlineProcessor.getInstance().getSuperClass(superClassName)
+            superClassName = ClassDataManager.getSuperClass(superClassName)
         }
         return false
     }

@@ -23,8 +23,6 @@ class ApkSlimmingTransform extends Transform {
     final Project project
     /* class/jar 处理器列表 */
     private List<BaseProcessor> processorList = new ArrayList<>()
-    /* 类数据列表: className 到 ClassModel 对象的映射 */
-    private Map<String, ClassModel> classModelMap = new HashMap<>()
     /* jar 文件中过滤 class 文件的处理器 */
     private Utils.UncompressFileFilter classFileUncompressFilter = new ClassFileUncompressFilter()
     /* Jar 文件解压监听处理器 */
@@ -34,49 +32,28 @@ class ApkSlimmingTransform extends Transform {
         this.project = project
     }
 
-    ClassModel getClassModel(String className) {
-        return classModelMap.get(className)
-    }
-
-    List<ClassModel> getClassModelList() {
-        List<ClassModel> classModelList = new LinkedList<>()
-        Collection<ClassModel> classModels = classModelMap.values()
-        for (ClassModel classModel : classModels) {
-            classModelList.add(classModel)
-        }
-        return classModelList
-    }
-
     void addProcessor(BaseProcessor processor) {
         processorList.add(processor)
     }
 
-    void addClassModel(ClassModel classModel) {
-        if (classModel == null || Utils.isEmpty(classModel.className)
-                || classModelMap.containsKey(classModel.className)) {
-            return
-        }
-        classModelMap.put(classModel.className, classModel)
-    }
-
     @Override
     String getName() {
-        return TAG;
+        return TAG
     }
 
     @Override
     Set<QualifiedContent.ContentType> getInputTypes() {
-        return TransformManager.CONTENT_CLASS;
+        return TransformManager.CONTENT_CLASS
     }
 
     @Override
     Set<? super QualifiedContent.Scope> getScopes() {
-        return TransformManager.SCOPE_FULL_PROJECT;
+        return TransformManager.SCOPE_FULL_PROJECT
     }
 
     @Override
     boolean isIncremental() {
-        return false;
+        return false
     }
 
     @Override
@@ -90,7 +67,7 @@ class ApkSlimmingTransform extends Transform {
         processorList.each { processor ->
             try {
                 processor.optimizeStart()
-                processor.accept(getClassModelList())
+                processor.accept(ClassDataManager.getClassModelList())
                 processor.optimizeEnd()
             } catch (Throwable t) {
                 Logger.e(TAG, "unexpected exception was occurred in processor = [$processor],"
@@ -160,9 +137,8 @@ class ApkSlimmingTransform extends Transform {
         try {
             ClassNode classParser = new ClassNode()
             new ClassReader(classFile.bytes).accept(classParser, ClassReader.EXPAND_FRAMES)
-            ClassModel classModel = new ClassModel(classParser.name, classFile)
-            classModel.fromJarFilePath = jarFilePath
-            addClassModel(classModel)
+            ClassDataManager.addClassModel(new SingleClassData(
+                    classParser.name, classFile, classParser.superName, jarFilePath))
             return true
         } catch (Exception exception) {
             Logger.e(TAG, "generateSingleClassModel", exception)
