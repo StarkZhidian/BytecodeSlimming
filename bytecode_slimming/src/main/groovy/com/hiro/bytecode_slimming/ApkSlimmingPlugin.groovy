@@ -27,7 +27,7 @@ class ApkSlimmingPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         Logger.setLogLevel(Logger.LOG_LEVEL_2)
-        Logger.d3(TAG, "BytecodeSlimming, version: 1.2.3")
+        Logger.d3("BytecodeSlimming", "version = [${Constants.VERSION}]")
         def androidExtension = project.extensions.getByType(AppExtension)
         def apkSlimmingTransform = new ApkSlimmingTransform(project)
         // 添加 access$xxx 方法内联 processor

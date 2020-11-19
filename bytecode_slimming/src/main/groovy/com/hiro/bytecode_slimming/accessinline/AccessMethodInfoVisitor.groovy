@@ -272,7 +272,8 @@ class AccessMethodInfoVisitor extends BaseMethodVisitor {
                 }
             }
         } catch (ShouldSkipInlineException e) {
-            Logger.e(TAG, "refineInstructions", e)
+            Logger.d3(TAG, "refineInstructions, access method shouldn't be inline," +
+                    " accessMethodInfo = [$accessMethodInfo]", e)
             refinedInsns.clear()
         }
         return refinedInsns;

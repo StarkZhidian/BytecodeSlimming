@@ -13,4 +13,6 @@ class Constants {
 
     static final String ACCESS_METHOD_NAME_PREFIX = 'access$'
 
+    static final String VERSION = "1.2.4"
+
 }
