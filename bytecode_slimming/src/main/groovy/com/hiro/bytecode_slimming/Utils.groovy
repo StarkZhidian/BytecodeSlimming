@@ -126,12 +126,12 @@ class Utils {
     }
 
     /**
-     * 解压参数指定的 jar 文件到当前文件夹
+     * 解压参数指定的 jar 文件到指定的文件夹下
      *
-     * TODO 非常坑的是: Windows 系统文件默认不区分大小写，
-     * TODO 在解压过程中可能出现同一个目录下有字母相同但是大小写不同的文件会存在相互替换的现象，导致类缺失问题，
-     * TODO 而 linux 系统默认区分文件名的大小写，因此该插件只适合开启了文件名大小写敏感的系统上使用
-     * TODO see: https://blog.csdn.net/weixin_42240407/article/details/96593863
+     * @param jarFile 要解压的 jar 文件
+     * @param outputDir 解压文件输出目录
+     * @param uncompressFileFilter 解压文件过滤器
+     * @param uncompressListener 解压文件监听
      */
     static void uncompressJarFile(File jarFile, File outputDir,
                                   UncompressFileFilter uncompressFileFilter,

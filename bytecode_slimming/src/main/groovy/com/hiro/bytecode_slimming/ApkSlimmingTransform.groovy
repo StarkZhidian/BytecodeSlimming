@@ -173,10 +173,11 @@ class ApkSlimmingTransform extends Transform {
     private static File getFirstCompiledClassesDir(Collection<TransformInput> inputs) {
         File resultDir = null
         inputs.each { input ->
-            // 这里一般是自己编写的 .class 文件的目录
             input.directoryInputs.each { DirectoryInput directoryInput ->
                 if (resultDir == null || (!resultDir.isDirectory())) {
                     Logger.d3(TAG, "getFirstCompiledClassesDir = " + directoryInput.file.getAbsolutePath())
+                    // 获取 java 源代码编译成 class 的目录，
+                    // 一般为 ${projectPath}\${module}\build\intermediates\javac\${buildType}\classes 文件夹
                     resultDir = directoryInput.file
                 }
             }
