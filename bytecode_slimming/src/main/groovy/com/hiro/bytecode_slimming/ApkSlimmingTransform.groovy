@@ -88,9 +88,14 @@ class ApkSlimmingTransform extends Transform {
         handleJarFileList(inputs, outputProvider)
         handleClassFileList(inputs)
         processorList.each { processor ->
-            processor.optimizeStart()
-            processor.accept(getClassModelList())
-            processor.optimizeEnd()
+            try {
+                processor.optimizeStart()
+                processor.accept(getClassModelList())
+                processor.optimizeEnd()
+            } catch (Throwable t) {
+                Logger.e(TAG, "unexpected exception was occurred in processor = [$processor],"
+                        + "\nexceptions: ", t)
+            }
         }
         // 处理完成之后进行 class 文件的拷贝
         copyClassDir(inputs, outputProvider)

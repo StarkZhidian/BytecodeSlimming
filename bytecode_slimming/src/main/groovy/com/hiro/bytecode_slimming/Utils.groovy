@@ -136,9 +136,8 @@ class Utils {
     static void uncompressJarFile(File jarFile, File outputDir,
                                   UncompressFileFilter uncompressFileFilter,
                                   JarUncompressListener uncompressListener) {
-        Logger.d2(TAG, "uncompressJarFile: jarFile = [${jarFile.getAbsolutePath()}]," +
-                " outputDir = [${outputDir.getAbsolutePath()}]," +
-                " uncompressListener = [$uncompressListener]")
+        Logger.d2(TAG, "uncompressJarFile: jarFile = [${jarFile.getAbsolutePath()}],"
+                + " outputDir = [${outputDir.getAbsolutePath()}]")
         if ((!isValidFile(jarFile)) || (!isJarFile(jarFile))) {
             return
         }
