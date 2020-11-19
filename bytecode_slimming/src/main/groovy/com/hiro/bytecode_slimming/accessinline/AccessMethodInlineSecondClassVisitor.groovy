@@ -2,12 +2,12 @@ package com.hiro.bytecode_slimming.accessinline
 
 import com.hiro.bytecode_slimming.BaseClassVisitor
 import com.hiro.bytecode_slimming.Logger
-import com.hiro.bytecode_slimming.ProcessorManager
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import com.hiro.bytecode_slimming.Constants
 
 /**
  * 第二次 class 文件扫描器，在这里读取第一次的扫描结果，进行真正的 class 文件内容修改
@@ -52,7 +52,7 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
         }
         // 如果 resultMethodVisitor 为 false，证明没有匹配到要删除的方法，返回自定义的方法访问器
         if (!resultMethodVisitor) {
-            return new MethodInstructionChangeVisitor(Opcodes.ASM6,
+            return new MethodInstructionChangeVisitor(Constants.ASM_VERSION,
                     super.visitMethod(access, name, desc, signature, exceptions),
                     accessMethodInfo)
         }

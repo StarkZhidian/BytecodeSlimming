@@ -4,6 +4,7 @@ import com.hiro.bytecode_slimming.BaseClassVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import com.hiro.bytecode_slimming.Constants
 
 /**
  * getter/setter 方法内联第一步的类访问器，用于访问类中的方法，初步判断 getter/setter 内联方法，
@@ -28,7 +29,7 @@ class GetterSetterInlineFirstClassVisitor extends BaseClassVisitor {
         def methodVisitor = super.visitMethod(access, name, desc, signature, exceptions)
         if (isGetterSetterMethod(access, name, desc)) {
             return new GetterSetterInlineFirstMethodVisitor(
-                    Opcodes.ASM6, methodVisitor, className, access, name, desc, signature, exceptions)
+                    Constants.ASM_VERSION, methodVisitor, className, access, name, desc, signature, exceptions)
         }
         return methodVisitor
     }

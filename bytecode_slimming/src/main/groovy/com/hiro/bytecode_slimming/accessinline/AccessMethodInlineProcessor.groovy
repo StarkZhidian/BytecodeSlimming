@@ -7,7 +7,6 @@ import com.hiro.bytecode_slimming.Logger
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
@@ -20,8 +19,6 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
 
     private static final def TAG = "AccessMethodInlineProcessor"
 
-    /* 记录需要进行 access$ 方法内联优化的类名 */
-    private Map<String, Boolean> needOptimizeClassNameRecorder = new HashMap<>()
     /* 类名到类文件路径的映射 */
     private Map<String, String> className2ClassFilePathMap = new HashMap<>()
     /* 类名到父类名的映射 */
@@ -55,16 +52,6 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
             return null
         }
         return className2SuperClassNameMap.get(className)
-    }
-
-    /**
-     * 添加需要进行 access$ 方法内联的类名
-     */
-    void appendOptimizeClassFile(String className) {
-        if (Utils.isEmpty(className)) {
-            return
-        }
-        needOptimizeClassNameRecorder.put(className, true)
     }
 
     /**
@@ -129,11 +116,11 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
         classModelList.each { classModel ->
             ClassReader cr = new ClassReader(classModel.fileBytes)
             cr.accept(new AccessMethodInlineFirstClassVisitor(
-                    Opcodes.ASM6, classModel.classFile), ClassReader.EXPAND_FRAMES)
+                    Constants.ASM_VERSION, classModel.classFile), ClassReader.EXPAND_FRAMES)
         }
         Logger.d2(TAG, "before filter, methodInlineInfoMap size = [${methodInlineInfoMap.size()}]")
         filterCanInlineAccessMethod()
-        Logger.d2(TAG, "after filter, methodInlineInfoMap: $methodInlineInfoMap, \nsize = [${methodInlineInfoMap.size()}]")
+        Logger.d2(TAG, "after filter, methodInlineInfoMap size = [${methodInlineInfoMap.size()}]")
         // 如果第一遍并且过滤扫描之后，没有发现需要进行 access$xxx 方法内联优化的类，直接返回
         if (methodInlineInfoMap.isEmpty()) {
             return
@@ -154,7 +141,7 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
                     ClassReader cr = new ClassReader(optimizeClassFile.bytes)
                     ClassWriter classWriter = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
                     cr.accept(new AccessMethodInlineSecondClassVisitor(
-                            Opcodes.ASM6, classWriter, accessMethodInfo), ClassReader.EXPAND_FRAMES)
+                            Constants.ASM_VERSION, classWriter, accessMethodInfo), ClassReader.EXPAND_FRAMES)
                     // 这里先通过 map 暂存起来 class 文件路径和对应的输出数据是为了
                     // 在某个 access$xxx 方法内联过程中发生了异常时可以方便回滚
                     tempAccessClassOutputDataMap.put(tempClassFilePath, classWriter.toByteArray())
@@ -188,7 +175,7 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
             }
             // 如果当前 access$xxx 不能内联，则从 map 中移除
             if (!accessMethodCanInline(accessMethodInfo)) {
-                Logger.d2(TAG, "filterCanInlineAccessMethod, can not inline accessMethod = [$accessMethodInfo]")
+                Logger.d1(TAG, "filterCanInlineAccessMethod, can not inline accessMethod = [$accessMethodInfo]")
                 iterator.remove()
             }
         }
@@ -257,8 +244,8 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
         if (Utils.isEmpty(className) || Utils.isEmpty(memberName) || Utils.isEmpty(desc)) {
             throw new IllegalArgumentException(TAG + ": memberFromAndroidPackage, argument is illegal!")
         }
-        String tempClassFilePath = null
-        File tempClassFile = null
+        String tempClassFilePath
+        File tempClassFile
         boolean[] findResult = [false]
         // className 不为空，进行查找
         while (!Utils.isEmpty(className)) {
@@ -312,13 +299,6 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
         // 这里为什么要重新获取一次 classFilePath，因为查找过程中用到的 classNode 对象可能是从缓存中取到的。
         // 所以最后判断的时候需要重新获取
         return findResult[0] && Utils.isValidFile(new File(getClassFilePath(className)))
-    }
-
-    @Override
-    void onOptimizeEnd() {
-        super.onOptimizeEnd()
-        needOptimizeClassNameRecorder.clear()
-        System.gc()
     }
 
     private static class InstanceHolder {

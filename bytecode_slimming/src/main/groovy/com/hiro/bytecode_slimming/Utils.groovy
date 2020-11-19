@@ -1,7 +1,6 @@
 package com.hiro.bytecode_slimming
 
 import org.objectweb.asm.Opcodes
-import sun.tools.jar.resources.jar
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile

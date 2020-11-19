@@ -5,7 +5,7 @@ import com.hiro.bytecode_slimming.ClassModel
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.Opcodes
+import com.hiro.bytecode_slimming.Constants
 
 /**
  * Class 文件中运行时不可见的注解清除处理器
@@ -25,7 +25,7 @@ class AnnotationRemoveProcessor extends BaseProcessor {
         classModelList.each {classModel ->
             ClassReader cr = new ClassReader(classModel.fileBytes)
             ClassWriter classWriter = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
-            cr.accept(new ClassAnnotationRmVisitor(Opcodes.ASM6, classWriter), ClassReader.EXPAND_FRAMES)
+            cr.accept(new ClassAnnotationRmVisitor(Constants.ASM_VERSION, classWriter), ClassReader.EXPAND_FRAMES)
             Utils.write2File(classWriter.toByteArray(), classModel.classFile)
         }
     }

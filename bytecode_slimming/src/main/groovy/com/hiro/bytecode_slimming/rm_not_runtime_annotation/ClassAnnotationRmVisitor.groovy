@@ -5,7 +5,8 @@ import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes
+import com.hiro.bytecode_slimming.Constants
+
 
 /**
  * 移除类里面的运行时不可见注解的 visitor
@@ -42,12 +43,12 @@ class ClassAnnotationRmVisitor extends ClassVisitor {
     @Override
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         return new MethodAnnotationRmVisitor(
-                Opcodes.ASM6, super.visitMethod(access, name, desc, signature, exceptions))
+                Constants.ASM_VERSION, super.visitMethod(access, name, desc, signature, exceptions))
     }
 
     @Override
     FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         return new FieldAnnotationRmVisitor(
-                Opcodes.ASM6, super.visitField(access, name, desc, signature, value))
+                Constants.ASM_VERSION, super.visitField(access, name, desc, signature, value))
     }
 }

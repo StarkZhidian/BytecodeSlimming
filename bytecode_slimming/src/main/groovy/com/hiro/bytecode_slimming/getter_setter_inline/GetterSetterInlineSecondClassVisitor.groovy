@@ -2,12 +2,13 @@ package com.hiro.bytecode_slimming.getter_setter_inline
 
 import com.hiro.bytecode_slimming.BaseClassVisitor
 import com.hiro.bytecode_slimming.Logger
-import com.hiro.bytecode_slimming.ProcessorManager
+
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import com.hiro.bytecode_slimming.Constants
 
 /**
  * Getter/Setter 方法内联第二次 class 文件访问器，主要是为了删除匹配到的 getter/setter 方法，
@@ -66,9 +67,8 @@ class GetterSetterInlineSecondClassVisitor extends BaseClassVisitor {
         // 如果 resultMethodVisitor[0] 为 false，
         // 证明没有匹配到要删除的 getter/setter 方法，返回自定义的方法访问器
         if (!resultMethodVisitor[0]) {
-            return new GetterSetterInlineSecondMethodVisitor(Opcodes.ASM6,
-                    super.visitMethod(access, name, desc, signature, exceptions),
-                    ProcessorManager.KEY_GETTER_SETTER_METHOD_INLINE)
+            return new GetterSetterInlineSecondMethodVisitor(Constants.ASM_VERSION,
+                    super.visitMethod(access, name, desc, signature, exceptions))
         }
         // 该方法为需要删除的 getter/setter 方法，计数，同时返回 null
         GetterSetterInlineProcessor.getInstance().increaseOptimizeCount()

@@ -1,6 +1,5 @@
 package com.hiro.bytecode_slimming.accessinline
 
-import com.hiro.bytecode_slimming.ProcessorManager
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes

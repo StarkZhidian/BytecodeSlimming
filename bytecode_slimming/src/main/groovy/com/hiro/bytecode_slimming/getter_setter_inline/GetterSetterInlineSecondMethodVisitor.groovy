@@ -1,7 +1,7 @@
 package com.hiro.bytecode_slimming.getter_setter_inline
 
 import com.hiro.bytecode_slimming.BaseMethodVisitor
-import com.hiro.bytecode_slimming.ProcessorManager
+
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -13,11 +13,8 @@ import org.objectweb.asm.Opcodes
 class GetterSetterInlineSecondMethodVisitor extends BaseMethodVisitor {
     private static final def TAG = "GetterSetterInlineSecondMethodVisitor"
 
-    private def processKey
-
-    GetterSetterInlineSecondMethodVisitor(int api, MethodVisitor mv, String processorKey) {
+    GetterSetterInlineSecondMethodVisitor(int api, MethodVisitor mv) {
         super(api, mv)
-        this.processKey = processorKey
     }
 
 
@@ -25,7 +22,7 @@ class GetterSetterInlineSecondMethodVisitor extends BaseMethodVisitor {
     void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
         def visitResult = [false]
         if (opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKESPECIAL) {
-            def processor = ProcessorManager.getInstance().getProcessor(processKey)
+            def processor = GetterSetterInlineProcessor.getInstance()
             processor.methodInlineInfoMap.values().each { getterSetterMethodInfo ->
                 // 如果调用的是 getter/setter 方法，则需要替换为 getfield/putfield 指令
                 if (Utils.textEquals(owner, getterSetterMethodInfo.className)

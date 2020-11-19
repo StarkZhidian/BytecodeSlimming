@@ -1,8 +1,8 @@
 package com.hiro.bytecode_slimming.accessinline
 
 import com.hiro.bytecode_slimming.BaseClassVisitor
+import com.hiro.bytecode_slimming.Constants
 import com.hiro.bytecode_slimming.Logger
-import com.hiro.bytecode_slimming.ProcessorManager
 import com.hiro.bytecode_slimming.Utils
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -36,9 +36,9 @@ class AccessMethodInlineFirstClassVisitor extends BaseClassVisitor {
             Logger.d1(TAG, "visitMethod accessMthod: $access, name: $name, desc: $desc, signature: $signature, exception: $exceptions")
             // 如果是编译器自动生成的 access$xxx 方法，
             // 则需要用自定义的方法访问器读取内部访问的字段/调用的方法信息
-            return new AccessMethodInfoVisitor(Opcodes.ASM6, null, className, access, name, desc, signature, exceptions)
+            return new AccessMethodInfoVisitor(Constants.ASM_VERSION, null, className, access, name, desc, signature, exceptions)
         }
-        return new AccessMethodInvokeVisitor(Opcodes.ASM6, null, className, access, name, desc, signature, exceptions)
+        return new AccessMethodInvokeVisitor(Constants.ASM_VERSION, null, className, access, name, desc, signature, exceptions)
     }
 
     /**

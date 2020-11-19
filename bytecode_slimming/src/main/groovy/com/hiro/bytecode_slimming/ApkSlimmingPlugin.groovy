@@ -20,16 +20,15 @@ class ApkSlimmingPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         Logger.setLogLevel(Logger.LOG_LEVEL_2)
-        Logger.d3(TAG, "BytecodeSlimming, version: 1.2.0")
+        Logger.d3(TAG, "BytecodeSlimming, version: 1.2.1")
         def androidExtension = project.extensions.getByType(AppExtension)
         def apkSlimmingTransform = new ApkSlimmingTransform(project)
-        def processorManager = ProcessorManager.getInstance()
         // 添加 access$xxx 方法内联 processor
-        apkSlimmingTransform.addProcessor(processorManager.getProcessor(ProcessorManager.KEY_ACCESS_METHOD_INLINE))
+        apkSlimmingTransform.addProcessor(AccessMethodInlineProcessor.getInstance())
         // 添加 getter/setter 方法内联 processor
 //        apkSlimmingTransform.addProcessor(processorManager.getProcessor(ProcessorManager.KEY_GETTER_SETTER_METHOD_INLINE))
         // 添加运行时不可见 annotation 注解去除 processor
-        apkSlimmingTransform.addProcessor(processorManager.getProcessor(ProcessorManager.KEY_NOT_RUNTIME_ANNOTATION_REMOVE))
+        apkSlimmingTransform.addProcessor(AnnotationRemoveProcessor.getInstance())
         // 注册 transform
         androidExtension.registerTransform(apkSlimmingTransform)
     }
