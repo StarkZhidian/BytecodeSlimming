@@ -23,9 +23,9 @@ class AccessMethodInlineFirstClassVisitor extends BaseClassVisitor {
 
     @Override
     MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (isAccessMethod(access, name)) {
+        if (isAccessMethod(access, name) && (!AccessMethodInlineProcessor.getInstance().inKeepClassList(className))) {
             Logger.d1(TAG, "visitMethod accessMthod: $access, name: $name, desc: $desc, signature: $signature, exception: $exceptions")
-            // 如果是编译器自动生成的 access$xxx 方法，
+            // 如果是编译器自动生成的 access$xxx 方法，同时当前类不在白名单类列表中
             // 则需要用自定义的方法访问器读取内部访问的字段/调用的方法信息
             return new AccessMethodInfoVisitor(Constants.ASM_VERSION, null, className, access, name, desc, signature, exceptions)
         }

@@ -62,13 +62,20 @@ class ApkSlimmingTransform extends Transform {
                    TransformOutputProvider outputProvider,
                    boolean isIncremental)
             throws IOException, TransformException, InterruptedException {
-        handleJarFileList(inputs, outputProvider)
+        handleJarFileList(inputs)
         handleClassFileList(inputs)
+        Logger.d3(TAG, "transform, class 信息读取完成, 读取的 class 数：${ClassDataManager.getClassDataSize()}")
         processorList.each { processor ->
             try {
+                long startTime = System.currentTimeMillis()
                 processor.optimizeStart()
-                processor.accept(ClassDataManager.getClassModelList())
+                // 这里为什么要每次重新获取一次 ClassDataList，
+                // 因为每个处理器在执行过程中可能会修改现有的类信息对象集合，
+                // 所以每次都要重新获取保证每次都是获取到最新的类信息
+                processor.accept(ClassDataManager.getClassDataList())
                 processor.optimizeEnd()
+                long endTime = System.currentTimeMillis()
+                Logger.d3(TAG, "处理器 $processor 执行耗时：[${Utils.millSecond2Second(endTime - startTime)}] 秒")
             } catch (Throwable t) {
                 Logger.e(TAG, "unexpected exception was occurred in processor = [$processor],"
                         + "\nexceptions: ", t)
@@ -83,8 +90,8 @@ class ApkSlimmingTransform extends Transform {
      * @param inputs 输入信息
      * @return
      */
-    private void handleJarFileList(Collection<TransformInput> inputs,
-                                   TransformOutputProvider outputProvider) {
+    private void handleJarFileList(Collection<TransformInput> inputs) {
+        int uncompressJarFileCount = 0
         final File compiledClassesDir = getFirstCompiledClassesDir(inputs)
         inputs.each { input ->
             // 对类型为jar 文件的 input 进行遍历
@@ -96,9 +103,12 @@ class ApkSlimmingTransform extends Transform {
                     // 解压到对应目录下，并对解压后的 .class 文件生成对应的 ClassModel 对象
                     Utils.uncompressJarFile(file, compiledClassesDir,
                             classFileUncompressFilter, jarUncompressListener)
+                    // 解压的 jar 文件数目加 1
+                    uncompressJarFileCount++
                 }
             }
         }
+        Logger.d3(TAG, "handleJarFileList, jar 文件解压完成，共解压：$uncompressJarFileCount 个文件")
     }
 
     /**
@@ -168,6 +178,7 @@ class ApkSlimmingTransform extends Transform {
      */
     private static void copyClassDir(Collection<TransformInput> inputs,
                                      TransformOutputProvider outputProvider) {
+        long startTime = System.currentTimeMillis()
         inputs.each { input ->
             // 这里一般是自己编写的 .class 文件的目录
             input.directoryInputs.each { DirectoryInput directoryInput ->
@@ -177,6 +188,9 @@ class ApkSlimmingTransform extends Transform {
                 FileUtils.copyDirectory(directoryInput.file, dest);
             }
         }
+        long endTime = System.currentTimeMillis()
+        Logger.d3(TAG, "复制类文件到下一个 transform 的类输入文件夹目录，" +
+                "耗时 [${Utils.millSecond2Second(endTime - startTime)}] 秒")
     }
 
     /**

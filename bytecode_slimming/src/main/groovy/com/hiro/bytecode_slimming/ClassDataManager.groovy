@@ -19,13 +19,20 @@ class ClassDataManager {
         return getInstance().classModelMap.get(className)
     }
 
-    static List<SingleClassData> getClassModelList() {
+    static List<SingleClassData> getClassDataList() {
         List<SingleClassData> classModelList = new LinkedList<>()
         Collection<SingleClassData> classModels = getInstance().classModelMap.values()
         for (SingleClassData classModel : classModels) {
             classModelList.add(classModel)
         }
         return classModelList
+    }
+
+    /**
+     * 获取当前的类信息总数
+     */
+    static int getClassDataSize() {
+        return getInstance().classModelMap.size()
     }
 
     static void addClassModel(SingleClassData classModel) {
@@ -38,7 +45,7 @@ class ClassDataManager {
     }
 
     /**
-     * 通过类名获取类文件，当碰见参数为 android framework 中类的情况(或者对应的类文件不参与编译)时，
+     * 通过类名获取类文件，当碰见参数为 android framework(android.jar) 中类的情况(或者对应的类文件不参与编译)时，
      * 这里返回值为 null，因为 framework 中的类文件本身不参与编译，也就没有对应的文件路径
      */
     static File getClassFile(String className) {
@@ -55,6 +62,20 @@ class ClassDataManager {
         }
         SingleClassData classModel = getClassModel(className)
         return classModel == null ? null : classModel.superClassName
+    }
+
+    /**
+     * 移除某个类的信息，同时删除对应的 class 文件
+     *
+     * @param className 移除的类名
+     * @return 是否删除成功
+     */
+    static boolean removeClassAndDeleteFile(String className) {
+        if(Utils.isEmpty(className)) {
+            return false
+        }
+        SingleClassData removedClassData = getInstance().classModelMap.remove(className)
+        return removedClassData != null && Utils.deleteFile(removedClassData.classFile)
     }
 
     private static class InstanceHolder {

@@ -4,14 +4,19 @@ package com.hiro.bytecode_slimming
  * log 工具类
  */
 class Logger {
+    /* log 信息级别：1 */
     static final int LOG_LEVEL_1 = 1
+    /* log 信息级别：2 */
     static final int LOG_LEVEL_2 = 2
+    /* log 信息级别：3 */
     static final int LOG_LEVEL_3 = 3
+    /* 不让任何级别的 log 信息输出 */
+    static final int LOG_LEVEL_NO_LOG = 4
 
     static int currentLogLevel = LOG_LEVEL_1
 
     static void setLogLevel(int logLevel) {
-        logLevel = Math.max(LOG_LEVEL_1, Math.min(LOG_LEVEL_3, logLevel))
+        logLevel = Math.max(LOG_LEVEL_1, Math.min(LOG_LEVEL_NO_LOG, logLevel))
         currentLogLevel = logLevel
     }
 

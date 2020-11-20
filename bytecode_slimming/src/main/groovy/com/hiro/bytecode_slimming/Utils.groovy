@@ -11,19 +11,21 @@ import java.util.regex.Pattern
  * 通用工具类
  */
 class Utils {
-    private static final def TAG = "Utils"
+    private static final String TAG = "Utils"
 
     private static Pattern paramsPat = Pattern.compile("(\\[?[BCZSIJFD])|(L[^;]+;)")
     /* 默认的缓存 byte 数组长度 */
     private static final int DEFAULT_BUFFER_LENGTH = 1024
     /* 读取到文件末尾的标识 */
     private static final int FILE_EOF = -1
+    /* 秒到毫秒的倍率 */
+    private static final int SECOND_2_MILLSECOND_RATE = 1000
 
-    static def isEmpty(CharSequence charSequence) {
+    static boolean isEmpty(CharSequence charSequence) {
         return charSequence == null || charSequence.length() == 0
     }
 
-    static def textEquals(CharSequence text1, CharSequence text2) {
+    static boolean textEquals(CharSequence text1, CharSequence text2) {
         return Objects.equals(text1, text2)
     }
 
@@ -76,23 +78,31 @@ class Utils {
         return file != null && file.isFile() && file.name.endsWith(Constants.CLASS_FILE_SUFFIX)
     }
 
-    static def isPrivate(int access) {
+    static boolean isPrivate(int access) {
         return (access & Opcodes.ACC_PRIVATE) == Opcodes.ACC_PRIVATE
     }
 
-    static def isPublic(int access) {
+    static boolean isPublic(int access) {
         return (access & Opcodes.ACC_PUBLIC) == Opcodes.ACC_PUBLIC;
     }
 
-    static def isProtected(int access) {
+    static boolean isProtected(int access) {
         return (access & Opcodes.ACC_PROTECTED) == Opcodes.ACC_PROTECTED;
     }
 
-    static def isPackage(int access) {
+    static boolean isPackage(int access) {
         return !isPrivate(access) && !isProtected(access) && !isPublic(access);
     }
 
-    static def toPublic(int access) {
+    static boolean isStatic(int access) {
+        return (access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC
+    }
+
+    static boolean isFinal(int access) {
+        return (access & Opcodes.ACC_FINAL) == Opcodes.ACC_FINAL
+    }
+
+    static int toPublic(int access) {
         if (isPrivate(access)) {
             access = access & (~Opcodes.ACC_PRIVATE)
         } else if (isProtected(access)) {
@@ -101,7 +111,7 @@ class Utils {
         return (access | Opcodes.ACC_PUBLIC)
     }
 
-    static def toPackage(int access) {
+    static int toPackage(int access) {
         if (isPrivate(access)) {
             access = access & (~Opcodes.ACC_PRIVATE)
         } else if (isProtected(access)) {
@@ -112,7 +122,7 @@ class Utils {
         return access
     }
 
-    static def getParameterCountFromMethodDesc(String desc) {
+    static int getParameterCountFromMethodDesc(String desc) {
         int beginIndex = desc.indexOf('(') + 1;
         int endIndex = desc.lastIndexOf(')');
         String paramsDesc = desc.substring(beginIndex, endIndex);
@@ -173,7 +183,7 @@ class Utils {
         }
     }
 
-    static def readDataFromInputStream(InputStream inputStream) {
+    static byte[] readDataFromInputStream(InputStream inputStream) {
         if (inputStream == null) {
             return null
         }
@@ -191,7 +201,7 @@ class Utils {
      *
      * @param data 给定的文件数据流
      */
-    static def isClassData(byte[] data) {
+    static boolean isClassData(byte[] data) {
         // .class 文件的前 4 个字节为魔数部分，值为 0xCAFEBABE
         if (data.length < 4) {
             return false
@@ -210,6 +220,43 @@ class Utils {
             return file.delete()
         }
         return true
+    }
+
+    /**
+     * 将 java 层的类名格式换成 JVM 层的类名，例：java.lang.String -> java/lang/String
+     */
+    static String getJVMClassName(String javaClassName) {
+        if (isEmpty(javaClassName)) {
+            return javaClassName
+        }
+        return javaClassName.replace('.', '/')
+    }
+
+    /**
+     * 毫秒转换到秒
+     */
+    static long millSecond2Second(long millSecond) {
+        return millSecond / SECOND_2_MILLSECOND_RATE
+    }
+
+    /**
+     * 判断参数给定的字符串中是否只有小写字母组成
+     */
+    static boolean onlyLowerLetter(String str) {
+        int length = str.length()
+        for (int i = 0; i < length; i++) {
+            if (!isLowerLetter(str.charAt(i))) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
+     * 判断参数给定的字符是否是小写字母
+     */
+    static boolean isLowerLetter(char c) {
+        return c >= 'a' && c <= 'z'
     }
 
     /**

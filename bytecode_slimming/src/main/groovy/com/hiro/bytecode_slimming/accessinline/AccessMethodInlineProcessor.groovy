@@ -71,9 +71,9 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
     }
 
     @Override
-    void onAccept(List<SingleClassData> classModelList) {
+    void onAccept(List<SingleClassData> classDataList) {
         // first traversal
-        classModelList.each { classModel ->
+        classDataList.each { classModel ->
             ClassReader cr = new ClassReader(classModel.fileBytes)
             cr.accept(new AccessMethodInlineFirstClassVisitor(
                     Constants.ASM_VERSION, classModel.classFile), ClassReader.EXPAND_FRAMES)
