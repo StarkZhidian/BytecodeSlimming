@@ -116,6 +116,13 @@ class AccessMethodInlineProcessor extends BaseMethodInlineProcessor<AccessMethod
         }
     }
 
+    @Override
+    void onOptimizeEnd() {
+        // recycle memory
+        classNode2ClassNodeMap.clear()
+        super.onOptimizeEnd()
+    }
+
     /**
      * 过滤出最终可以进行内联的 access 方法
      */

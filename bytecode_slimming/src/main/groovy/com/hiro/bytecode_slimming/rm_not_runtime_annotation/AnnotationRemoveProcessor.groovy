@@ -51,7 +51,7 @@ class AnnotationRemoveProcessor extends BaseProcessor {
         }
         int startPos = 0
         int endPos = annotationClassDesc.length()
-        if (annotationClassDesc.startsWith(Constants.CLASS_DESC_PREFIX)) {
+        if (annotationClassDesc.startsWith(Constants.CUSTOM_CLASS_DESC_PREFIX)) {
             startPos++
         }
         if (annotationClassDesc.endsWith(Constants.CLASS_DESC_SUFFIX)) {
@@ -79,6 +79,9 @@ class AnnotationRemoveProcessor extends BaseProcessor {
     @Override
     void onOptimizeEnd() {
         Logger.d3(TAG, "处理器：[$this] 删除了: [$deletedAnnotationClassFileCount] 个注解类文件")
+        // recycle memory
+        removedAnnotationList.clear()
+        deletedAnnotationClassFileCount = 0
         super.onOptimizeEnd()
     }
 
