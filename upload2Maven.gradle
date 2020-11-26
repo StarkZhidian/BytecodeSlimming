@@ -36,7 +36,7 @@ println "mavenPasswords = [$mavenPasswords]"
 apply plugin: 'maven'
 
 /* 指定要上传的制品库版本 */
-def version = "1.2.5"
+def version = "1.2.6"
 /* 指定要上传的制品库文件在本地的绝对路径，例：C:\Users\hongweiqiu\Documents\WXWork\1688850566796750\Cache\File\2020-06\open_sdk.jar */
 def productFilePath = "./repos/com/hiro/android/bytecode_slimming/${version}/bytecode_slimming-${version}.jar"
 println "productFilePath = [$productFilePath]"

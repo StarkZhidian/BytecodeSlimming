@@ -4,6 +4,7 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.hiro.bytecode_slimming.accessinline.AccessMethodInlineProcessor
+import com.hiro.bytecode_slimming.r_slimming.RSlimmingProcessor
 import com.hiro.bytecode_slimming.rm_not_runtime_annotation.AnnotationRemoveProcessor
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -28,15 +29,16 @@ class BytecodeSlimmingPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        if (project.plugins.hasPlugin(LibraryPlugin.class)) {
+        // 插件不能应用于 library project 中
+        if (project.plugins.hasPlugin(LibraryPlugin)) {
             throw new GradleException("$TAG can't be used to library module.")
         }
+        Logger.d3(TAG, "version = [${Constants.VERSION}]")
+        // 创建插件的扩展选项
+        project.extensions.create(BytecodeSlimmingExtension.NAME, BytecodeSlimmingExtension)
         if (project.plugins.hasPlugin(AppPlugin)) {
-            Logger.d3(TAG, "version = [${Constants.VERSION}]")
-            // 创建插件的扩展选项
-            project.extensions.create(BytecodeSlimmingExtension.NAME, BytecodeSlimmingExtension)
-            def apkSlimmingTransform = new ApkSlimmingTransform(project)
-            // 注册 transform
+            // 创建并注册 transform
+            ApkSlimmingTransform apkSlimmingTransform = new ApkSlimmingTransform(project)
             project.extensions.getByType(AppExtension).registerTransform(apkSlimmingTransform)
             // 注册应用该插件的 module 对应的 gradle 文件配置完成后调用监听
             project.afterEvaluate {
@@ -46,24 +48,29 @@ class BytecodeSlimmingPlugin implements Plugin<Project> {
                 if (!bytecodeSlimmingExtension.enable) {
                     return
                 }
+                Logger.d3(TAG, "register Transform = [$apkSlimmingTransform]")
+                // 处理对应的 processor
                 if (bytecodeSlimmingExtension.slimmingAccessInline) {
                     // 添加 access$xxx 方法内联 processor
                     AccessMethodInlineProcessor accessMethodInlineProcessor = AccessMethodInlineProcessor.getInstance()
                     accessMethodInlineProcessor.addInKeepClassList(bytecodeSlimmingExtension.keepAccessClass)
                     apkSlimmingTransform.addProcessor(accessMethodInlineProcessor)
+                    Logger.d3(TAG, "add processor = [$accessMethodInlineProcessor]")
                 }
                 if (bytecodeSlimmingExtension.slimmingNonRuntimeAnnotation) {
                     // 添加运行时不可见 annotation 注解去除 processor
                     AnnotationRemoveProcessor annotationRemoveProcessor = AnnotationRemoveProcessor.getInstance()
                     annotationRemoveProcessor.addInKeepClassList(bytecodeSlimmingExtension.keepAnnotationClass)
                     apkSlimmingTransform.addProcessor(annotationRemoveProcessor)
+                    Logger.d3(TAG, "add processor = [$annotationRemoveProcessor]")
                 }
-//                if (bytecodeSlimmingExtension.slimmingR) {
-//                    // 添加 R 文件瘦身 processor
-//                    RSlimmingProcessor rSlimmingProcessor = RSlimmingProcessor.getInstance()
-//                    rSlimmingProcessor.addInKeepClassList(bytecodeSlimmingExtension.keepRClass)
-//                    apkSlimmingTransform.addProcessor(rSlimmingProcessor)
-//                }
+                if (bytecodeSlimmingExtension.slimmingR) {
+                    // 添加 R 文件瘦身 processor
+                    RSlimmingProcessor rSlimmingProcessor = RSlimmingProcessor.getInstance()
+                    rSlimmingProcessor.addInKeepClassList(bytecodeSlimmingExtension.keepRClass)
+                    apkSlimmingTransform.addProcessor(rSlimmingProcessor)
+                    Logger.d3(TAG, "add processor = [$rSlimmingProcessor]")
+                }
                 // 设置全局的 logLevel
                 Logger.setLogLevel(bytecodeSlimmingExtension.logLevel)
             }

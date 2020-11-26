@@ -57,7 +57,7 @@ class Utils {
     }
 
     static boolean isValidFile(File file) {
-        return file != null && file.isFile() && file.size() > 0;
+        return file != null && file.isFile() && file.exists() && file.size() > 0;
     }
 
     static boolean isValidDir(File file) {
@@ -240,23 +240,35 @@ class Utils {
     }
 
     /**
-     * 判断参数给定的字符串中是否只有小写字母组成
+     * 以 / 作为分隔符，分隔 JVM 层的类名中各个部分，例：java/lang/String -> [java, lang, String]
      */
-    static boolean onlyLowerLetter(String str) {
-        int length = str.length()
-        for (int i = 0; i < length; i++) {
-            if (!isLowerLetter(str.charAt(i))) {
-                return false
-            }
+    static String[] splitJVMClassName(String className) {
+        if (isEmpty(className)) {
+            return className
         }
-        return true
+        return className.split(Constants.JVM_CLASS_INTERVAL)
     }
 
     /**
-     * 判断参数给定的字符是否是小写字母
+     * 获取参数指定的 JVM 中类全限定名的纯类名部分字符串
      */
-    static boolean isLowerLetter(char c) {
-        return c >= 'a' && c <= 'z'
+    static String getPureClassName(String jvmClassName) {
+        if (isEmpty(jvmClassName)) {
+            return jvmClassName
+        }
+        int classIntervalPos = jvmClassName.lastIndexOf(Constants.JVM_CLASS_INTERVAL)
+        return classIntervalPos >= 0 ? jvmClassName.substring(classIntervalPos + 1) : jvmClassName
+    }
+
+    /**
+     * 获取参数指定的 JVM 类型描述是否为基本类型
+     */
+    static boolean isBasicType(String jvmTypeDesc) {
+        if (isEmpty(jvmTypeDesc)) {
+            return false
+        }
+        return ((!jvmTypeDesc.startsWith(Constants.ARRAY_CLASS_DESC_PREFIX))
+                && (!jvmTypeDesc.startsWith(Constants.CUSTOM_CLASS_DESC_PREFIX)))
     }
 
     /**

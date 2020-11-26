@@ -62,6 +62,7 @@ class ApkSlimmingTransform extends Transform {
                    TransformOutputProvider outputProvider,
                    boolean isIncremental)
             throws IOException, TransformException, InterruptedException {
+        long allStartTime = System.currentTimeMillis()
         handleJarFileList(inputs)
         handleClassFileList(inputs)
         Logger.d3(TAG, "transform, class 信息读取完成, 读取的 class 数：${ClassDataManager.getClassDataSize()}")
@@ -83,6 +84,8 @@ class ApkSlimmingTransform extends Transform {
         }
         // 处理完成之后进行 class 文件的拷贝
         copyClassDir(inputs, outputProvider)
+        Logger.d3(TAG, "BytecodeSlimming 插件运行完成，" +
+                "耗时 [${Utils.millSecond2Second(System.currentTimeMillis() - allStartTime)}] 秒")
     }
 
     /**
