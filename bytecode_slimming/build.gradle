@@ -21,7 +21,7 @@ targetCompatibility = "8"
 apply plugin: 'maven' // 引入 maven 插件
 
 // 升级时一定要增加版本号!
-version='1.2.6'
+version='1.2.7'
 
 // 通过gradlew :bytecode_slimming:uploadArchives命令上传
 uploadArchives {

@@ -33,27 +33,56 @@ class Utils {
         if (outputFile == null || !outputFile.exists()) {
             return
         }
-        FileOutputStream fos = new FileOutputStream(outputFile)
-        fos.write(data)
-        fos.close()
+        FileOutputStream fos = null
+        try {
+            fos = new FileOutputStream(outputFile)
+            fos.write(data)
+        } catch (Throwable t) {
+            Logger.e(TAG, "write2File method got exception: $t")
+            throw t
+        } finally {
+            closeStream(fos)
+        }
     }
 
     static void write2File(byte[] data, String outputFilePath) {
         write2File(data, new File(outputFilePath))
     }
 
-    static void write2File(InputStream inputStream, File outputFile) {
+    static void write2File(InputStream inputStream, File outputFile, boolean closeInputStream) {
         if (outputFile == null || !outputFile.exists()) {
             return
         }
-        FileOutputStream fos = new FileOutputStream(outputFile);
-        byte[] bs = new byte[1024]
-        int readLen
-        while ((readLen = inputStream.read(bs)) >= 0) {
-            fos.write(bs, 0, readLen);
+        FileOutputStream fos = null
+        try {
+            fos = new FileOutputStream(outputFile);
+            byte[] bs = new byte[1024]
+            int readLen
+            while ((readLen = inputStream.read(bs)) >= 0) {
+                fos.write(bs, 0, readLen);
+            }
+        } catch (Throwable t) {
+            Logger.e(TAG, "write2File method got exception: $t")
+            throw t
+        } finally {
+            if (closeInputStream) {
+                closeStream(inputStream)
+            }
+            closeStream(fos)
         }
-        inputStream.close();
-        fos.close();
+    }
+
+    static boolean closeStream(Closeable closeable) {
+        if (closeable == null) {
+            return false
+        }
+        try {
+            closeable.close()
+            return true
+        } catch (Throwable t) {
+            Logger.e(TAG, "closeStream: $closeable got exception: $t")
+            return false
+        }
     }
 
     static boolean isValidFile(File file) {
@@ -174,13 +203,14 @@ class Utils {
                 // 处理文件
                 currentFile.parentFile.mkdirs()
                 currentFile.createNewFile()
-                write2File(jarFileDes.getInputStream(jarEntry), currentFile)
+                write2File(jarFileDes.getInputStream(jarEntry), currentFile, true)
                 // 回调接口
                 if (uncompressListener != null) {
                     uncompressListener.onUncompressSingleFile(currentFile, jarFile.getAbsolutePath())
                 }
             }
         }
+        jarFileDes.close()
     }
 
     static byte[] readDataFromInputStream(InputStream inputStream) {
