@@ -18,7 +18,7 @@ class Constants {
     /* JVM (.class 文件中) 中非基本类型描述以 L 开头 */
     static final String CUSTOM_CLASS_DESC_PREFIX = 'L'
 
-    /* jVM (.class 文件中) 中数组类型描述以 [ 开头 */
+    /* JVM (.class 文件中) 中数组类型描述以 [ 开头 */
     static final String ARRAY_CLASS_DESC_PREFIX = '['
 
     /* JVM (.class 文件中) 中非基本类型描述以 ; 结尾 */

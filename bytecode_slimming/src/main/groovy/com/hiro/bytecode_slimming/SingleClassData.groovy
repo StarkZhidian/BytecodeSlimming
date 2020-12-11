@@ -1,7 +1,5 @@
 package com.hiro.bytecode_slimming
 
-import sun.tools.jar.resources.jar
-
 /**
  * 单个 class 相关数据封装类
  */
