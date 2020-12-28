@@ -1,4 +1,4 @@
-package com.hiro.bytecode_slimming.r_slimming
+package com.hiro.bytecode_slimming.constants_field_rm
 
 import com.hiro.bytecode_slimming.BaseMethodVisitor
 import com.hiro.bytecode_slimming.Constants
@@ -8,22 +8,22 @@ import org.objectweb.asm.MethodVisitor
 /**
  * 内联方法中使用到的 R.xxx.xxx 的 MethodVisitor
  */
-class RFieldInlineMethodVisitor extends BaseMethodVisitor {
+class ConstantFieldInlineMethodVisitor extends BaseMethodVisitor {
     private static final String TAG = "RFieldInlineMethodVisitor"
 
-    private BaseRSlimmingClassVisitor baseRSlimmingClassVisitor
+    private BaseConstantFieldSlimmingClassVisitor baseRSlimmingClassVisitor
 
-    RFieldInlineMethodVisitor(MethodVisitor mv, String className,
-                              int access, String methodName, String desc,
-                              String signature, String[] exceptions,
-                              BaseRSlimmingClassVisitor baseRSlimmingClassVisitor) {
+    ConstantFieldInlineMethodVisitor(MethodVisitor mv, String className,
+                                     int access, String methodName, String desc,
+                                     String signature, String[] exceptions,
+                                     BaseConstantFieldSlimmingClassVisitor baseRSlimmingClassVisitor) {
         super(Constants.ASM_VERSION, mv, className, access, methodName, desc, signature, exceptions)
         this.baseRSlimmingClassVisitor = baseRSlimmingClassVisitor
     }
 
     @Override
     void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        Integer rFieldValue = RFieldRecorder.getInstance().getRFieldValue(owner, name)
+        Object rFieldValue = ConstantFieldRecorder.getInstance().getRFieldValue(owner, name)
         if (rFieldValue != null) {
             super.visitLdcInsn(rFieldValue)
             // 标记改类的数据已经被修改

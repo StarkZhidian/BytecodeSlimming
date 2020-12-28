@@ -5,6 +5,7 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.hiro.bytecode_slimming.accessinline.AccessMethodInlineProcessor
 import com.hiro.bytecode_slimming.r_slimming.RSlimmingProcessor
+import com.hiro.bytecode_slimming.constant_class_slimming.ConstantClassSlimming
 import com.hiro.bytecode_slimming.rm_not_runtime_annotation.AnnotationRemoveProcessor
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -70,6 +71,14 @@ class BytecodeSlimmingPlugin implements Plugin<Project> {
                     rSlimmingProcessor.addInKeepClassList(bytecodeSlimmingExtension.keepRClass)
                     apkSlimmingTransform.addProcessor(rSlimmingProcessor)
                     Logger.d3(TAG, "add processor = [$rSlimmingProcessor]")
+                }
+                if (bytecodeSlimmingExtension.slimmingConstantFieldsClassList != null
+                        && !bytecodeSlimmingExtension.slimmingConstantFieldsClassList.isEmpty()) {
+                    // 添加类文件常量字段移除 processor
+                    ConstantClassSlimming constantClassSlimming = ConstantClassSlimming.getInstance()
+                    constantClassSlimming.appendClass(bytecodeSlimmingExtension.slimmingConstantFieldsClassList)
+                    apkSlimmingTransform.addProcessor(constantClassSlimming)
+                    Logger.d3(TAG, "add processor = [$constantClassSlimming]")
                 }
                 // 设置全局的 logLevel
                 Logger.setLogLevel(bytecodeSlimmingExtension.logLevel)

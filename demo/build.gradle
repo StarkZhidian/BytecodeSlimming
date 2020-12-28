@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.hiro.android:bytecode_slimming:1.2.7'
+        classpath 'com.hiro.android:bytecode_slimming:1.2.8'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -36,7 +36,7 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles "proguard.cfg"
         }
     }
@@ -47,6 +47,7 @@ apply plugin: 'com.hiro.android.bytecode_slimming'
 
 bytecodeSlimming {
     logLevel 2
+    slimmingConstantFieldsClass "com.hiro.demo.constant.Constants"
     keepAnnotationClass "androidx.annotation.Nullable", "androidx.annotation.NonNull"
 }
 

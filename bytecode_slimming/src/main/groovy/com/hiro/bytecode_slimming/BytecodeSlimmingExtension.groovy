@@ -15,6 +15,8 @@ class BytecodeSlimmingExtension {
     boolean slimmingNonRuntimeAnnotation = true
     /* 是否开启 R 文件瘦身，默认开启 */
     boolean slimmingR = true
+    /* 需要进行常量字段移除的类名列表，默认为空列表 */
+    final List<String> slimmingConstantFieldsClassList = new LinkedList<>()
     /* log 过滤级别，默认为只能输出级别为 LOG_LEVEL_2 及以上的 log 信息 */
     int logLevel = Logger.LOG_LEVEL_2
 
@@ -24,6 +26,27 @@ class BytecodeSlimmingExtension {
     final List<String> keepAnnotationClass = new LinkedList<>()
     /* 不进行瘦身的 R 类名列表 */
     final List<String> keepRClass = new LinkedList<>()
+
+    BytecodeSlimmingExtension slimmingConstantFieldsClass(String... classNames) {
+        if (classNames != null) {
+            slimmingConstantFieldsClass(Arrays.asList(classNames))
+        }
+        return this
+    }
+
+    BytecodeSlimmingExtension slimmingConstantFieldsClass(List<String> classNameList) {
+        Logger.d3(TAG, "slimmingConstantFieldsClass = $classNameList")
+        if (classNameList != null) {
+            classNameList.each { className ->
+                if (Utils.isEmpty(className) || slimmingConstantFieldsClassList.contains(
+                        className = Utils.getJVMClassName(className))) {
+                    return
+                }
+                slimmingConstantFieldsClassList.add(className)
+            }
+        }
+        return this
+    }
 
     BytecodeSlimmingExtension keepAccessClass(String... classNames) {
         if (classNames != null) {

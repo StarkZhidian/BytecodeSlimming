@@ -1,21 +1,21 @@
-package com.hiro.bytecode_slimming.r_slimming
+package com.hiro.bytecode_slimming.constants_field_rm
 
 import com.hiro.bytecode_slimming.BaseClassVisitor
 import org.objectweb.asm.ClassVisitor
 
 /**
- * R 文件瘦身处理器中的类访问器基类
+ * 类文件常量字段移除处理器中的类访问器基类
  */
-class BaseRSlimmingClassVisitor extends BaseClassVisitor {
+class BaseConstantFieldSlimmingClassVisitor extends BaseClassVisitor {
 
     /* 当前类中的数据是否被更改过 */
     protected boolean dataIsChanged
 
-    BaseRSlimmingClassVisitor(int api) {
+    BaseConstantFieldSlimmingClassVisitor(int api) {
         super(api)
     }
 
-    BaseRSlimmingClassVisitor(int api, ClassVisitor cv) {
+    BaseConstantFieldSlimmingClassVisitor(int api, ClassVisitor cv) {
         super(api, cv)
     }
 

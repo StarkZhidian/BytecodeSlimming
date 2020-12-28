@@ -1,23 +1,22 @@
-package com.hiro.bytecode_slimming.r_slimming
+package com.hiro.bytecode_slimming.constants_field_rm
 
 import com.hiro.bytecode_slimming.Utils
-import jdk.internal.org.objectweb.asm.tree.FieldNode
 
 /**
- * 要移除的 R 类文件中的字段记录器
+ * 要移除类文件中的常量字段的值记录器
  */
-class RFieldRecorder {
+class ConstantFieldRecorder {
 
-    private Map<String, Integer> rFieldRecorderMap = new HashMap<>()
+    private Map<String, Object> rFieldRecorderMap = new HashMap<>()
 
-    private RFieldRecorder() {
+    private ConstantFieldRecorder() {
     }
 
-    static RFieldRecorder getInstance() {
+    static ConstantFieldRecorder getInstance() {
         return InstanceHolder.INSTANCE
     }
 
-    void appendRField(String className, String fieldName, int fieldValue) {
+    void appendRField(String className, String fieldName, Object fieldValue) {
         if (Utils.isEmpty(className) || Utils.isEmpty(fieldName)) {
             return
         }
@@ -39,7 +38,7 @@ class RFieldRecorder {
     }
 
     private static final class InstanceHolder {
-        static final RFieldRecorder INSTANCE = new RFieldRecorder()
+        static final ConstantFieldRecorder INSTANCE = new ConstantFieldRecorder()
     }
 
 }

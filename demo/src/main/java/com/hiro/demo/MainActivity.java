@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
+import com.hiro.demo.constant.ConstantReader;
 import com.hiro.demo.getter_setter.UseData;
 
 public class MainActivity extends Activity {
@@ -31,6 +32,7 @@ public class MainActivity extends Activity {
             }
         });
         new OperateSuperFieldInnerClass().visitField();
+        ConstantReader.main(null);
     }
 
     /**

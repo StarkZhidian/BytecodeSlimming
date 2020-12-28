@@ -9,9 +9,9 @@ import org.objectweb.asm.ClassVisitor
 class BaseClassVisitor extends ClassVisitor {
 
     /* 记录当前访问的类名 */
-    def className
+    String className
     /* 记录当前访问类的父类名 */
-    def superClassName
+    String superClassName
 
     BaseClassVisitor(int api) {
         super(api)
