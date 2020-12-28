@@ -45,17 +45,17 @@ abstract class BaseConstantFieldSlimmingProcessor extends BaseProcessor {
         }
         // second traversal
         classDataList.each { singleClassData ->
-            String rClassName = singleClassData.className
-            File rClassFile
-            if (!canRemoveConstantFields(rClassName)
-                    && Utils.isValidFile((rClassFile = ClassDataManager.getClassFile(rClassName)))) {
+            String fieldInlineClassName = singleClassData.className
+            File fieldInlineClassFile
+            if (!canRemoveConstantFields(fieldInlineClassName)
+                    && Utils.isValidFile((fieldInlineClassFile = ClassDataManager.getClassFile(fieldInlineClassName)))) {
                 ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS)
                 ConstantFieldInlineClassVisitor constantFieldInlineClassVisitor =
                         new ConstantFieldInlineClassVisitor(Constants.ASM_VERSION, classWriter)
-                new ClassReader(rClassFile.bytes).accept(constantFieldInlineClassVisitor, ClassReader.EXPAND_FRAMES)
+                new ClassReader(fieldInlineClassFile.bytes).accept(constantFieldInlineClassVisitor, ClassReader.EXPAND_FRAMES)
                 // 如果内部数据改变了，则需要将修改后的类数据写回对应的文件中
                 if (constantFieldInlineClassVisitor.dataIsChanged) {
-                    Utils.write2File(classWriter.toByteArray(), rClassFile)
+                    Utils.write2File(classWriter.toByteArray(), fieldInlineClassFile)
                 }
             }
         }
