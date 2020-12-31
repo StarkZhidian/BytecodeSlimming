@@ -9,7 +9,7 @@ import org.objectweb.asm.FieldVisitor
  * 扫描并且删除类文件中无用常量字段的 class visitor
  */
 class ConstantFieldSlimmingScanClassVisitor extends BaseConstantFieldSlimmingClassVisitor {
-    private static final String TAG = "RSlimmingClassVisitor"
+    private static final String TAG = "ConstantFieldSlimmingScanClassVisitor"
 
     /* 判断某个类文件是否可以删除，如果一个类中的所有字段都被删除了，那么这个类文件也可以被删除 */
     private boolean canDeleteClassFile = true
@@ -32,9 +32,6 @@ class ConstantFieldSlimmingScanClassVisitor extends BaseConstantFieldSlimmingCla
 
     @Override
     FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        if (className.endsWith("Constants")) {
-            Logger.d3(TAG, "className = [$className], name = [$name], desc = [$desc], signature=[$signature], value=[$value]")
-        }
         if (canRemove(access, value)) {
             // 如果当前字段可以移除，则记录移除的字段值
             ConstantFieldRecorder.getInstance().appendRField(className, name, value)

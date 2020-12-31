@@ -7,7 +7,7 @@ import com.hiro.bytecode_slimming.Utils
  */
 class ConstantFieldRecorder {
 
-    private Map<String, Object> rFieldRecorderMap = new HashMap<>()
+    private Map<String, Object> constantFieldRecorderMap = new HashMap<>()
 
     private ConstantFieldRecorder() {
     }
@@ -20,14 +20,14 @@ class ConstantFieldRecorder {
         if (Utils.isEmpty(className) || Utils.isEmpty(fieldName)) {
             return
         }
-        rFieldRecorderMap.put(makeRFieldKey(className, fieldName), fieldValue)
+        constantFieldRecorderMap.put(makeRFieldKey(className, fieldName), fieldValue)
     }
 
     Integer getRFieldValue(String className, String fieldName) {
         if (Utils.isEmpty(className) || Utils.isEmpty(fieldName)) {
             return null
         }
-        return rFieldRecorderMap.get(makeRFieldKey(className, fieldName))
+        return constantFieldRecorderMap.get(makeRFieldKey(className, fieldName))
     }
 
     private static String makeRFieldKey(String className, String fieldName) {

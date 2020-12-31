@@ -12,7 +12,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.hiro.android:bytecode_slimming:1.2.8'
+        classpath 'com.hiro.android:bytecode_slimming:1.2.9'
+        classpath 'org.ow2.asm:asm:6.0'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

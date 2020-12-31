@@ -9,7 +9,7 @@ import org.objectweb.asm.MethodVisitor
  * 内联方法中使用到的 R.xxx.xxx 的 MethodVisitor
  */
 class ConstantFieldInlineMethodVisitor extends BaseMethodVisitor {
-    private static final String TAG = "RFieldInlineMethodVisitor"
+    private static final String TAG = "ConstantFieldInlineMethodVisitor"
 
     private BaseConstantFieldSlimmingClassVisitor baseRSlimmingClassVisitor
 

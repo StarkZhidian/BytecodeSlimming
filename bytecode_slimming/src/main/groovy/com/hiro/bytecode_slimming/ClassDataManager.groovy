@@ -11,6 +11,14 @@ class ClassDataManager {
     private ClassDataManager() {
     }
 
+    static void init() {
+        clear()
+    }
+
+    static void clear() {
+        getInstance().classModelMap.clear()
+    }
+
     static ClassDataManager getInstance() {
         return InstanceHolder.INSTANCE
     }

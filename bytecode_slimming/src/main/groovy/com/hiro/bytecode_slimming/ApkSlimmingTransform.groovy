@@ -63,9 +63,10 @@ class ApkSlimmingTransform extends Transform {
                    boolean isIncremental)
             throws IOException, TransformException, InterruptedException {
         long allStartTime = System.currentTimeMillis()
+        Logger.d3(TAG, "transform, 开始读取 class 文件信息")
         handleJarFileList(inputs)
         handleClassFileList(inputs)
-        Logger.d3(TAG, "transform, class 信息读取完成, 读取的 class 数：${ClassDataManager.getClassDataSize()}")
+        Logger.d3(TAG, "transform, class 文件信息读取完成, 读取的 class 文件数：${ClassDataManager.getClassDataSize()}")
         processorList.each { processor ->
             try {
                 long startTime = System.currentTimeMillis()

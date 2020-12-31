@@ -37,6 +37,8 @@ class BytecodeSlimmingPlugin implements Plugin<Project> {
         Logger.d3(TAG, "version = [${Constants.VERSION}]")
         // 创建插件的扩展选项
         project.extensions.create(BytecodeSlimmingExtension.NAME, BytecodeSlimmingExtension)
+        // 初始化类数据池
+        ClassDataManager.init()
         if (project.plugins.hasPlugin(AppPlugin)) {
             // 创建并注册 transform
             ApkSlimmingTransform apkSlimmingTransform = new ApkSlimmingTransform(project)
