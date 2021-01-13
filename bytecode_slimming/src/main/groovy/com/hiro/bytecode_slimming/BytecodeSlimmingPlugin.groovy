@@ -19,9 +19,10 @@ import org.gradle.api.Project
  *
  * 2、在文件名不区分大小写的系统中(Windows)使用时可能出现问题，
  * 原因是在解压 jar 文件过程中可能出现同一个目录下有字母相同但是大小写不同的文件会存在相互替换的现象，
- * 导致类缺失问题，see {@link Utils#uncompressJarFile(File, File, UncompressFileFilter, JarUncompressListener)}
+ * 比如 A.class 和 a.class 两个名字在 windows 系统中被视为同一个文件名，两个文件不能存放在同一个目录下，
+ * 否则后加入的文件会替换掉之前的文件。导致类缺失问题，该问题在此插件中主要体现在 jar 文件解压的过程：
+ * see {@link Utils#uncompressJarFile(File, File, UncompressFileFilter, JarUncompressListener)}
  * 因此该插件只适合开启了文件名大小写敏感的系统(Linux)上使用，
- * see: https://blog.csdn.net/weixin_42240407/article/details/96593863
  *
  * @author hongweiqiu
  */

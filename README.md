@@ -20,8 +20,9 @@
 导致类缺失问题。
 
 因此该插件只适合开启了文件名大小写敏感的系统(Linux)上使用。
-
-see: https://blog.csdn.net/weixin_42240407/article/details/96593863
+在文件名大小写不敏感鹅系统（windows）可能会出现类缺失的问题，
+在 windows 系统中，A.class 和 a.class 两个名字被视为同一个文件名，
+两个文件不能存放在同一个目录下，否则后加入的文件会替换掉之前的文件。
 
 ## 使用
 在工程中的 app module 中的 buildscript 闭包中的依赖仓库闭包（repositories）中加入该 maven 库：
@@ -57,6 +58,8 @@ bytecodeSlimming {
   keepAnnotationClass
   /* 不进行瘦身的 R 文件类名（语法：java 中类全限定名：包名.纯类名）列表，默认为空 */
   keepRClass
+  /* 需要进行常量字段内联的类名（语法：java 中类全限定名：包名.纯类名）列表，默认为空列表 */
+  slimmingConstantFieldsClass
 }
 ```
 
