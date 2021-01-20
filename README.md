@@ -71,7 +71,9 @@ bytecodeSlimming {
 我们先来看一下 Android 安装包的构建流程：
 ![](./1.png)
 
-图中 `Compilers` 过程为将工程 module 中的源代码和外部依赖库编译为 `.class/jar` 文件集，同时包含了 `proguard` (代码混淆)、`dexbuild` (dex 文件生成)、`mergedex`（dex 文件合并）等过程，最后将得到的一个/多个 `dex` 文件输出到指定目录，用于 apk 文件的合成和签名等。这里的 `Compilers` 过程的内部流程可以用如下的图来描述：
+图中的<img src="./16.png" style="zoom:50%;" />过程省略了很多东西，我们细化一下这个过程在源码编译过程所做的事情：
+
+将工程 module 中的源代码编译为 `.class` 文件，同时和外部依赖库中 `jar` 包一起组成整个代码编译结果集合。而后进行 `proguard` (代码混淆)、`dexbuild` (dex 文件生成) 等过程，最后将得到的一个/多个 `dex` 文件输出到指定目录，用于 apk 文件的合成和签名等。可以用如下的图来描述：
 
 ![](./2.png)
 
@@ -492,7 +494,7 @@ public class ConstantReader {
 
 
 
-既然 `lib module/aar` 中资源 id 的最终值需要等到所属的 `app module` 中的代码编译完成后才能确定，而 `aar` 中的类是不会进行重新编译的，我们可以在 `app module` 代码编译完成后，扫描引用到最终的 `R$xxx.class` 中的资源 id 字段的字节码(`getfield`)，并替换为最终得到的 id 的 `int` 常量值。在完成其他类对 `R` 类中的 id 字段引用到对应 id 字段的常量值替换之后，`R` 类中对应的常量字段就可以删除了。从而达到优化安装包大小的目的。
+既然 `lib module/aar` 中资源 id 的最终值需要等到所属的 `app module` 中的代码编译完成后才能确定。而 `aar` 中的类是不会进行重新编译的，我们可以在 `app module` 代码编译完成后，扫描引用到最终的 `R$xxx.class` 中的资源 id 字段的字节码(`getfield`)，并替换为最终得到的 id 的 `int` 常量值。在完成其他类对 `R` 类中的 id 字段引用到对应 id 字段的常量值替换之后，`R` 类中对应的常量字段就可以删除了。从而达到优化安装包大小的目的。
 
 
 
