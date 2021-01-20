@@ -1,7 +1,5 @@
 package com.hiro.demo.constant;
 
-import android.util.Log;
-
 /**
  * 常量读取类
  */
@@ -41,5 +39,4 @@ public class ConstantReader {
         int[] intArray = Constants.INT_ARRAY_CONSTANT;
         System.out.println(intArray);
     }
-
 }
