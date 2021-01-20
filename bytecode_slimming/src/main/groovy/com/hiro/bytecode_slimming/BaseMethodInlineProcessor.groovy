@@ -1,7 +1,5 @@
 package com.hiro.bytecode_slimming
 
-import com.hiro.bytecode_slimming.accessinline.AccessMethodInfo
-
 /**
  * 基础的方法内联处理器
  */

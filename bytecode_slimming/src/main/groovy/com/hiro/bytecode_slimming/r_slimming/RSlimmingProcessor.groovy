@@ -9,7 +9,8 @@ import com.hiro.bytecode_slimming.Utils
 class RSlimmingProcessor extends BaseConstantFieldSlimmingProcessor {
     private static final String TAG = "RSlimmingProcessor"
 
-    private static final String[] R_CLASS_PURE_NAME = ['R$anim',
+    private static final String[] R_CLASS_PURE_NAME = ['R',
+                                                       'R$anim',
                                                        'R$array',
                                                        'R$attr',
                                                        'R$bool',

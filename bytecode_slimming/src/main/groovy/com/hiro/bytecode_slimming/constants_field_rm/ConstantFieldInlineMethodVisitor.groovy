@@ -23,14 +23,15 @@ class ConstantFieldInlineMethodVisitor extends BaseMethodVisitor {
 
     @Override
     void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        Object rFieldValue = ConstantFieldRecorder.getInstance().getRFieldValue(owner, name)
-        if (rFieldValue != null) {
-            super.visitLdcInsn(rFieldValue)
+        Object constantFieldValue = ConstantFieldRecorder.getInstance().getRFieldValue(owner, name)
+        if (constantFieldValue != null) {
+            super.visitLdcInsn(constantFieldValue)
             // 标记改类的数据已经被修改
             if (baseRSlimmingClassVisitor != null) {
                 baseRSlimmingClassVisitor.dataIsChanged = true
             }
-            Logger.d1(TAG, "inline r field, class: $owner, name: $name, to value: $rFieldValue")
+            Logger.d1(TAG, "inline r field, class: $owner, name: $name, desc: $desc, " +
+                    "to value: $constantFieldValue")
         } else {
             super.visitFieldInsn(opcode, owner, name, desc)
         }

@@ -1,7 +1,7 @@
 package com.hiro.bytecode_slimming
 
 /**
- * 当前插件的所有 class 相关信息数据管理类
+ * 当前插件的所有 class 信息数据管理类
  */
 class ClassDataManager {
 

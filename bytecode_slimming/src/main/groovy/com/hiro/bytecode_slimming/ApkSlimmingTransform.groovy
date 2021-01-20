@@ -72,7 +72,7 @@ class ApkSlimmingTransform extends Transform {
                 long startTime = System.currentTimeMillis()
                 processor.optimizeStart()
                 // 这里为什么要每次重新获取一次 ClassDataList，
-                // 因为每个处理器在执行过程中可能会修改现有的类信息对象集合，
+                // 因为每个处理器在执行过程中可能会修改现有的类信息集合，
                 // 所以每次都要重新获取保证每次都是获取到最新的类信息
                 processor.accept(ClassDataManager.getClassDataList())
                 processor.optimizeEnd()

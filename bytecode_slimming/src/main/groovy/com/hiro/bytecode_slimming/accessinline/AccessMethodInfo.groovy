@@ -14,7 +14,7 @@ class AccessMethodInfo {
     final String methodName
     /* 方法的描述（java 层的方法签名除去方法名） */
     final String desc
-    /* access$xxx 方法内部访问(通过 getfield 指令)的字段 */
+    /* access$xxx 方法内部访问(通过 getfield/putfield 指令)的字段 */
     List<OperateFieldInfo> operateFieldInfoList = new LinkedList<>()
     /* access$xxx 方法内部通过 invokespecial 指令调用方法信息 */
     List<InvokeMethodInfo> invokeMethodInfoList = new LinkedList()

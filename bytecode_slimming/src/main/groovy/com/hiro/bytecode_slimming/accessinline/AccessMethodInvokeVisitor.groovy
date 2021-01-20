@@ -25,7 +25,7 @@ class AccessMethodInvokeVisitor extends BaseMethodVisitor {
     void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
         // 如果方法内部调用了 access$xxx 方法，那么将这个文件也记录到 access$xxx 方法关联的类文件列表中
         if (opcode == Opcodes.INVOKESTATIC && name.startsWith(Constants.ACCESS_METHOD_NAME_PREFIX)) {
-            AccessMethodInlineProcessor processor = AccessMethodInlineProcessor.getInstance();
+            AccessMethodInlineProcessor processor = AccessMethodInlineProcessor.getInstance()
             AccessMethodInfo accessMethodInfo = processor.getOrNewAccessMethodInfo(owner, name, desc)
             // 如果对应的内联方法为 null，则说明参数非法，此时调用父类方法逻辑并返回
             if (accessMethodInfo == null) {

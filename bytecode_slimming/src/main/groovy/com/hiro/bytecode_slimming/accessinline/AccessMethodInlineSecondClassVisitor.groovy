@@ -12,6 +12,7 @@ import com.hiro.bytecode_slimming.Constants
 
 /**
  * 第二次 class 文件扫描器，在这里读取第一次的扫描结果，进行真正的 class 文件内容修改
+ *
  * @author hongweiqiu
  */
 class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
@@ -64,7 +65,7 @@ class AccessMethodInlineSecondClassVisitor extends BaseClassVisitor {
 
     static def isOperateFieldMember(List fieldInfoList, String className, String fieldName, String desc) {
         if (fieldInfoList == null || fieldInfoList.isEmpty()) {
-            return false;
+            return false
         }
         def result = [false]
         fieldInfoList.each { AccessMethodInfo.OperateFieldInfo fileInfo ->
