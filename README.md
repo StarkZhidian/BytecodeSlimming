@@ -494,9 +494,31 @@ public class ConstantReader {
 
 
 
-既然 `lib module/aar` 中资源 id 的最终值需要等到所属的 `app module` 中的代码编译完成后才能确定。而 `aar` 中的类是不会进行重新编译的，我们可以在 `app module` 代码编译完成后，扫描引用到最终的 `R$xxx.class` 中的资源 id 字段的字节码(`getfield`)，并替换为最终得到的 id 的 `int` 常量值。在完成其他类对 `R` 类中的 id 字段引用到对应 id 字段的常量值替换之后，`R` 类中对应的常量字段就可以删除了。从而达到优化安装包大小的目的。
+从这篇文章中我们知道，`lib module/aar` 中的资源需要等到所属的 `app module` 编译完成后才会生成对应的 `R` 类，一个普通的 `aar` 文件中是不会有 `R` 类的：
 
+![](./19.png)
 
+但是代码又确实存在资源 id 的引用：
+
+![](./20.png)
+
+![](./18.png)
+
+所以依赖这个 `aar` 的 `app module` 在编译打包 apk 时就需要为这个 `aar` 生成一个包前缀名为 `com.zhidian.basic` 的 `R` 类文件。不然运行时就会出现 `NoSuchFieldException` 异常。其实不仅是这个 `aar`， `app module` 需要为所有依赖的 `aar/ lib module`（`aar` 本质上还是 `lib module` 的编译产物）生成对应的 `R` 类。而最后的 `apk` 中会存在所有相关的 `R` 类：
+
+![](./21.png)
+
+**虽然 `app module` 为所有依赖的 `aar/lib module` 生成了对应的 `R` 类文件。但是 `aar` 中的类是不会进行重新编译的，也就是原来 `aar` 中类获取资源 id 的方式为字段引用，在最终的 `apk` 中的形式还是字段引用。**
+
+那么我们是不是可以手动 “帮” 编译器做一次 `R` 类文件中普通 `int` 类型 id 常量字段的内联，然后将内联的常量字段删除，来达到优化安装包大小的目的呢？
+
+我们可以在 `app module` 代码编译完成后，扫描并记录所有的 `R` 类文件中的 `int` 类型常量字段。而后将引用到 `R` 类中的资源 id 字段的字节码(`getfield`) 替换为该字段的直接值。在完成其他类对 `R` 类中的 id 字段引用到对应 id 字段的直接值替换之后，`R` 类中对应的常量字段就可以删除了。从而达到优化安装包大小的目的。
+
+#### 优化效果
+
+对项目中的普通类 `com.tencent.assistant.st.STConstAction`，`com.tencent.assistant.st.STConst` `com.tencent.rapidview.PhotonConst` `com.tencent.rapidview.report.PhotonReportConst`，四个基本/`java.lang.String` 类型常量字段较多的类进行优化的收益大约在 10kb 左右。
+
+`R` 文件字段内联由于项目以前已经存在该功能，本次未接入。
 
 ### 运行时不可见注解去除
 
@@ -517,8 +539,10 @@ java.lang.annotation.RetentionPolicy#RUNTIME
 
 这部分步骤比较简单，只需要遍历类/类方法/类字段/方法参数中的注解，如果是运行时不可见的注解，则直接删除，同时记录注解类名，最后将所有运行时不可见的注解类文件删除即可。
 
+#### 优化效果
+
+由于这部分优化的类文件较少，暂为统计优化效果。
 
 
-更多的优化点待加入...
 
 
