@@ -501,7 +501,7 @@ public class ConstantReader {
 
 ![](./18.png)
 
-所以依赖这个 `aar` 的 `app module` 在编译打包 apk 时就需要为这个 `aar` 生成一个包前缀名为 `com.zhidian.basic` 的 `R` 类文件。不然运行时就会出现 `NoSuchFieldException` 异常。其实不仅是这个 `aar`， `app module` 需要为所有依赖的 `aar/ lib module`（`aar` 本质上还是 `lib module` 的编译产物）生成对应的 `R` 类。而最后的 `apk` 中会存在所有相关的 `R` 类：
+所以依赖这个 `aar` 的 `app module` 在编译打包 apk 时就需要为这个 `aar` 生成一个包前缀名为 `com.zhidian.basic` 的 `R` 类文件。不然运行时就会出现 `NoClassDefFoundError/ClassNotFoundException` 异常。其实不仅是这个 `aar`， `app module` 需要为所有依赖的 `aar/ lib module`（`aar` 本质上还是 `lib module` 的编译产物）生成对应的 `R` 类。而最后的 `apk` 中会存在所有相关的 `R` 类：
 
 ![](./21.png)
 
