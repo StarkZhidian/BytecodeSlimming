@@ -1,4 +1,13 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+apply plugin: 'com.hiro.android.bytecode_slimming'
+
+bytecodeSlimming {
+    logLevel 2
+    slimmingConstantFieldsClass "com.hiro.demo.constant.Constants"
+    keepAnnotationClass "androidx.annotation.Nullable", "androidx.annotation.NonNull"
+}
 
 buildscript {
     repositories {
@@ -7,12 +16,11 @@ buildscript {
         }
 
         google()
-        jcenter()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.hiro.android:bytecode_slimming:1.2.9'
+        classpath 'com.hiro.android:bytecode_slimming:1.3.0'
         classpath 'org.ow2.asm:asm:6.0'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -42,14 +50,10 @@ android {
         }
     }
 
-}
-
-apply plugin: 'com.hiro.android.bytecode_slimming'
-
-bytecodeSlimming {
-    logLevel 2
-    slimmingConstantFieldsClass "com.hiro.demo.constant.Constants"
-    keepAnnotationClass "androidx.annotation.Nullable", "androidx.annotation.NonNull"
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -63,4 +67,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation "androidx.core:core-ktx:1.6.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
