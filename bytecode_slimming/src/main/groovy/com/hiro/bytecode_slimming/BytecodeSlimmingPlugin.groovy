@@ -4,6 +4,7 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.hiro.bytecode_slimming.accessinline.AccessMethodInlineProcessor
+import com.hiro.bytecode_slimming.method_log.MethodLogProcessor
 import com.hiro.bytecode_slimming.r_slimming.RSlimmingProcessor
 import com.hiro.bytecode_slimming.constant_class_slimming.ConstantClassSlimming
 import com.hiro.bytecode_slimming.rm_not_runtime_annotation.AnnotationRemoveProcessor
@@ -51,6 +52,10 @@ class BytecodeSlimmingPlugin implements Plugin<Project> {
                     return
                 }
                 Logger.d3(TAG, "register Transform = [$apkSlimmingTransform]")
+                // method log processor
+                MethodLogProcessor methodLogProcessor = MethodLogProcessor.getInstance()
+                apkSlimmingTransform.addProcessor(methodLogProcessor)
+                Logger.d3(TAG, "add processor = [$methodLogProcessor]")
                 // 处理对应的 processor
                 if (bytecodeSlimmingExtension.slimmingAccessInline) {
                     // 添加 access$xxx 方法内联 processor

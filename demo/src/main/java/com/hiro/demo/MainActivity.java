@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
+
+import com.hiro.demo.annotation.MethodEnterLog;
 import com.hiro.demo.constant.ConstantReader;
 import com.hiro.demo.getter_setter.UseData;
 
@@ -15,9 +17,50 @@ public class MainActivity extends Activity {
 
     private TextView helloTv;
 
+    @MethodEnterLog
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        init();
+    }
+
+    @MethodEnterLog
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @MethodEnterLog
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @MethodEnterLog
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @MethodEnterLog
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @MethodEnterLog
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @MethodEnterLog
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    private void init() {
         setContentView(R.layout.content_main);
         new AccessInlineClass(this).onCreate();
         new UseData().onCreate();
